@@ -1,5 +1,5 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 
-namespace OneTouchAutomationProject.ViewModels;
+namespace OneTouchAutomation.ViewModels;
 
 public abstract class ViewModelBase : ObservableObject { }

@@ -1,4 +1,4 @@
-﻿namespace OneTouchAutomationProject.ViewModels;
+﻿namespace OneTouchAutomation.ViewModels;
 
 public class MainWindowViewModel : ViewModelBase
 {

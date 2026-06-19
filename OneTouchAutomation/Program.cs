@@ -1,7 +1,7 @@
 ﻿using System;
 using Avalonia;
 
-namespace OneTouchAutomationProject;
+namespace OneTouchAutomation;
 
 internal sealed class Program
 {

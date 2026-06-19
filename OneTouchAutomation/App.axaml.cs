@@ -1,10 +1,10 @@
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
-using OneTouchAutomationProject.ViewModels;
-using OneTouchAutomationProject.Views;
+using OneTouchAutomation.ViewModels;
+using OneTouchAutomation.Views;
 
-namespace OneTouchAutomationProject;
+namespace OneTouchAutomation;
 
 public class App : Application
 {

@@ -1,6 +1,6 @@
 using Avalonia.Controls;
 
-namespace OneTouchAutomationProject.Views;
+namespace OneTouchAutomation.Views;
 
 public partial class MainWindow : Window
 {
