@@ -15,12 +15,15 @@ namespace OneTouchAutomation.ViewModels;
 
 public partial class MainWindowViewModel : ViewModelBase
 {
-    public MainWindowViewModel(IMessenger messenger)
+    public MainWindowViewModel(IMessenger messenger, AppAppearanceSettings appearance)
     {
+        Appearance = appearance;
         Items = new ObservableCollection<SideBarItemModel>(_templates);
 
         SelectedListItem = Items.First(vm => vm.ModelType == typeof(HomePageViewModel));
     }
+
+    public MainWindowViewModel(AppAppearanceSettings appearance) : this(new WeakReferenceMessenger(), appearance) { }
     
     private readonly List<SideBarItemModel> _templates = new()
     {
@@ -29,6 +32,13 @@ public partial class MainWindowViewModel : ViewModelBase
             ModelType = typeof(HomePageViewModel), 
             IconKey = OneTouchAutomation.Constants.Icon.Home, 
             Title = "Home"
+        },
+        
+        new SideBarItemModel()
+        {
+            ModelType = typeof(GamePageViewModel), 
+            IconKey   = OneTouchAutomation.Constants.Icon.Game, 
+            Title     = "Game"
         },
         
         new SideBarItemModel
@@ -40,14 +50,16 @@ public partial class MainWindowViewModel : ViewModelBase
         
         new SideBarItemModel
         {
-        ModelType = typeof(InfoPageViewModel), 
-        IconKey = OneTouchAutomation.Constants.Icon.Info, 
-        Title = "Info"
-        }
+            ModelType = typeof(InfoPageViewModel), 
+            IconKey = OneTouchAutomation.Constants.Icon.Info, 
+            Title = "Info"
+        },
+        
+        
         
     };
 
-    public MainWindowViewModel() : this(new WeakReferenceMessenger()) { }
+    public MainWindowViewModel() : this(new WeakReferenceMessenger(), new AppAppearanceSettings()) { }
     
     [ObservableProperty]
     private bool _isPaneOpen;
@@ -72,6 +84,8 @@ public partial class MainWindowViewModel : ViewModelBase
     }
     
     public ObservableCollection<SideBarItemModel> Items { get; }
+
+    public AppAppearanceSettings Appearance { get; }
 
     [RelayCommand]
     private void TriggerPane()

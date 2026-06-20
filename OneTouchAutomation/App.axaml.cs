@@ -6,6 +6,7 @@ using DynamicData;
 using Microsoft.Extensions.DependencyInjection;
 using OneTouchAutomation.ViewModels;
 using OneTouchAutomation.Views;
+using OneTouchAutomation.Views.Page;
 
 namespace OneTouchAutomation;
 
@@ -46,15 +47,20 @@ public class App : Application
     
     internal static void ConfigureViewModels(IServiceCollection services)
     {
+        services.AddSingleton<AppAppearanceSettings>();
         services.AddSingleton<MainWindowViewModel>();
         services.AddTransient<HomePageViewModel>();
+        services.AddTransient<GamePageViewModel>();
         services.AddTransient<SettingsPageViewModel>();
+        services.AddTransient<InfoPageViewModel>();
     }
     
     internal static void ConfigureViews(IServiceCollection services)
     {
         services.AddSingleton<MainWindow>();
         services.AddTransient<HomePage>();
+        services.AddTransient<GamePage>();
         services.AddTransient<SettingsPage>();
+        services.AddTransient<InfoPage>();
     }
 }

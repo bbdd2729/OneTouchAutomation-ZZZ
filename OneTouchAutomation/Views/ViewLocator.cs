@@ -5,6 +5,7 @@ using Avalonia.Controls.Templates;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.DependencyInjection;
 using OneTouchAutomation.ViewModels;
+using OneTouchAutomation.Views.Page;
 
 namespace OneTouchAutomation.Views;
 
@@ -18,6 +19,8 @@ public class ViewLocator : IDataTemplate
         RegisterViewFactory<MainWindowViewModel, MainWindow>();
         RegisterViewFactory<HomePageViewModel, HomePage>();
         RegisterViewFactory<SettingsPageViewModel, SettingsPage>();
+        RegisterViewFactory<InfoPageViewModel, InfoPage>();
+        RegisterViewFactory<GamePageViewModel, GamePage>();
     }
     
     public Control Build(object? data)

@@ -2,7 +2,7 @@
 using Avalonia.Controls;
 using Avalonia.Markup.Xaml;
 
-namespace OneTouchAutomation.Views.Page;
+namespace OneTouchAutomation.Views;
 
 public partial class InfoPage : UserControl
 {
