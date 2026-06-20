@@ -4,7 +4,21 @@
              RequestedThemeVariant="Default">
     <!-- "Default" ThemeVariant follows system theme variant. "Dark" or "Light" are other available options. -->
 
+    <Application.Resources>
+       <ResourceDictionary>
+           
+           
+           
+       </ResourceDictionary>
+    </Application.Resources>
     <Application.Styles>
         <FluentTheme />
+        
+        <Style Selector="TextBlock.Icon">
+            <Setter Property="FontFamily" Value="Segoe Fluent Icons" />
+            <Setter Property="Text" Value="{DynamicResource IconBrush}" />
+        </Style>
+        
+        
     </Application.Styles>
 </Application>
