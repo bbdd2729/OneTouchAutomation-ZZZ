@@ -5,12 +5,15 @@ using Avalonia.Media.Imaging;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using OneTouchAutomation.Services.Capture;
+using OneTouchAutomation.Services.Vision;
 
 namespace OneTouchAutomation.ViewModels;
 
 public partial class VisionDebugViewModel : ViewModelBase
 {
     private readonly IScreenCaptureService _screenCaptureService;
+
+    private readonly IVisionDebugService _visionDebugService;
 
     [ObservableProperty] private CapturedFrame? _currentFrame;
 
@@ -28,12 +31,13 @@ public partial class VisionDebugViewModel : ViewModelBase
 
     [ObservableProperty] private double _threshold = 0.85;
 
-    public VisionDebugViewModel(IScreenCaptureService screenCaptureService)
+    public VisionDebugViewModel(IScreenCaptureService screenCaptureService, IVisionDebugService visionDebugService)
     {
         _screenCaptureService = screenCaptureService;
+        _visionDebugService   = visionDebugService;
     }
 
-    public VisionDebugViewModel() : this(new ScreenCaptureService()) { }
+    public VisionDebugViewModel() : this(new ScreenCaptureService(), new OpenCvVisionDebugService()) { }
 
     public ObservableCollection<string> Logs { get; } = new();
 
@@ -67,11 +71,39 @@ public partial class VisionDebugViewModel : ViewModelBase
     }
 
     [RelayCommand]
-    private Task RunMatchAsync()
+    private async Task RunMatchAsync()
     {
-        MatchResultText = "Match service not implemented yet.";
-        Logs.Insert(0, "Run match clicked.");
+        if (CurrentFrame is null)
+        {
+            MatchResultText = "Capture screen first.";
+            Logs.Insert(0, MatchResultText);
+            return;
+        }
 
-        return Task.CompletedTask;
+        if (TemplateBytes is null)
+        {
+            MatchResultText = "Load template first.";
+            Logs.Insert(0, MatchResultText);
+            return;
+        }
+
+        var result = await _visionDebugService.MatchTemplateAsync
+            (new TemplateMatchRequest
+            {
+                SourceBytes   = CurrentFrame.PngBytes,
+                TemplateBytes = TemplateBytes,
+                Threshold     = Threshold,
+            });
+
+        MatchResultText =
+            $"{result.Message} MatchScore={result.MatchScore:0.000}, Bounds={result.MatchBounds}";
+
+        Logs.Insert(0, MatchResultText);
+
+        if (result.MatchedRegionBytes is not null)
+        {
+            using var stream = new MemoryStream(result.MatchedRegionBytes);
+            PreviewImage = new Bitmap(stream);
+        }
     }
 }

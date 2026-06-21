@@ -2,6 +2,7 @@ using Avalonia.Controls.ApplicationLifetimes;
 using CommunityToolkit.Mvvm.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection;
 using OneTouchAutomation.Services.Capture;
+using OneTouchAutomation.Services.Vision;
 using OneTouchAutomation.ViewModels;
 using OneTouchAutomation.Views;
 
@@ -66,5 +67,6 @@ public class App : Application
     internal static void ConfigureServices(IServiceCollection services)
     {
         services.AddSingleton<IScreenCaptureService, ScreenCaptureService>();
+        services.AddSingleton<IVisionDebugService, OpenCvVisionDebugService>();
     }
 }
