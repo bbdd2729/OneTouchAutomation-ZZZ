@@ -3,6 +3,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:vm="clr-namespace:OneTouchAutomation.ViewModels"
+             xmlns:constants="clr-namespace:OneTouchAutomation.Constants"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="OneTouchAutomation.Views.DebugPage"
              x:DataType="vm:DebugPageViewModel">
@@ -11,11 +12,26 @@
     </Design.DataContext>
 
     <TabControl Margin="10">
-        <TabItem Header="选项卡1">
-            <TextBlock Margin="5">这是标签页 1的内容</TextBlock>
+        <TabItem>
+            <!-- Header 中显示图标和文本 -->
+            <TabItem.Header>
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Classes="Icon" Text="{x:Static constants:Icon.Navigation}" />
+                    <TextBlock Margin="5,0,0,0">Vision Debug</TextBlock>
+                </StackPanel>
+            </TabItem.Header>
+            <!-- 内容区域 -->
+            <TextBlock>Vision Debug</TextBlock>
         </TabItem>
-        <TabItem Header="选项卡2">
-            <TextBlock Margin="5">这是标签页 2的内容</TextBlock>
+
+        <TabItem>
+            <TabItem.Header>
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Classes="Icon" Text="{x:Static constants:Icon.Navigation}" />
+                    <TextBlock Margin="5,0,0,0">Behavior Debug</TextBlock>
+                </StackPanel>
+            </TabItem.Header>
+            <TextBlock>Behavior Debug</TextBlock>
         </TabItem>
     </TabControl>
 </UserControl>
