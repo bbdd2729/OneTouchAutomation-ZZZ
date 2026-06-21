@@ -1,4 +1,6 @@
-﻿using System.Threading;
+﻿using System.Collections.Generic;
+using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using OpenCvSharp;
 using Point = OpenCvSharp.Point;
@@ -59,43 +61,91 @@ public class OpenCvVisionDebugService : IVisionDebugService
              out _,
              out Point maxLoc);
 
-        Rect bounds = new Rect
-            (
-             maxLoc.X,
-             maxLoc.Y,
-             template.Width,
-             template.Height);
+        var matches = new List<TemplateMatchItem>();
 
-        var isMatch = maxVal >= request.Threshold;
+        for (int y = 0; y < result.Rows; y++)
+        {
+            for (int x = 0; x < result.Cols; x++)
+            {
+                var matchScore = result.At<float>(y, x);
+
+                if (matchScore < request.Threshold)
+                {
+                    continue;
+                }
+
+                var bounds = new Rect
+                    (
+                     x,
+                     y,
+                     template.Width,
+                     template.Height);
+
+                if (matches.Any(m => IsOverlapping(m.MatchBounds, bounds)))
+                {
+                    continue;
+                }
+
+                matches.Add
+                    (new TemplateMatchItem
+                    {
+                        MatchScore  = matchScore,
+                        MatchBounds = bounds
+                    });
+            }
+        }
 
         using var debug = source.Clone();
 
-        Cv2.Rectangle
-            (debug,
-             bounds,
-             isMatch ? Scalar.Green : Scalar.Red,
-             2);
+        foreach (var match in matches)
+        {
+            Cv2.Rectangle
+                (
+                 debug,
+                 match.MatchBounds,
+                 Scalar.LimeGreen,
+                 2);
 
-        Cv2.PutText
-            (
-             debug,
-             $"{maxVal:0.000}",
-             new Point(bounds.X, Math.Max(20, bounds.Y - 8)),
-             HersheyFonts.HersheySimplex,
-             0.7,
-             isMatch ? Scalar.LimeGreen : Scalar.Red,
-             2);
+            Cv2.PutText
+                (
+                 debug,
+                 $"{match.MatchScore:0.000}",
+                 new Point(match.MatchBounds.X, Math.Max(20, match.MatchBounds.Y - 8)),
+                 HersheyFonts.HersheySimplex,
+                 0.6,
+                 Scalar.LimeGreen,
+                 2);
+        }
 
         Cv2.ImEncode(".png", debug, out var debugBytes);
+
+        var best = matches.OrderByDescending(m => m.MatchScore).FirstOrDefault();
 
         return Task.FromResult
             (new TemplateMatchResult
             {
-                IsMatch            = isMatch,
-                MatchScore         = maxVal,
-                MatchBounds        = bounds,
+                IsMatch            = matches.Count > 0,
+                MatchScore         = best?.MatchScore ?? 0,
+                MatchBounds        = best?.MatchBounds ?? default,
+                Matches            = matches,
                 MatchedRegionBytes = debugBytes,
-                Message            = isMatch ? "Matched." : "No match above threshold.",
+                Message = matches.Count > 0
+                    ? $"Matched {matches.Count} item(s)."
+                    : "No match above threshold.",
             });
+    }
+
+    private static bool IsOverlapping(Rect a, Rect b)
+    {
+        var intersection     = a & b;
+        var intersectionArea = intersection.Width * intersection.Height;
+
+        if (intersectionArea <= 0)
+        {
+            return false;
+        }
+
+        var minArea = Math.Min(a.Width * a.Height, b.Width * b.Height);
+        return intersectionArea > minArea * 0.5;
     }
 }
