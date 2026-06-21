@@ -3,7 +3,6 @@ using CommunityToolkit.Mvvm.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection;
 using OneTouchAutomation.ViewModels;
 using OneTouchAutomation.Views;
-using OneTouchAutomation.Views.Page;
 
 namespace OneTouchAutomation;
 

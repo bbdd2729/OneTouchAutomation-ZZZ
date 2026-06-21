@@ -5,7 +5,7 @@
              xmlns:models="clr-namespace:OneTouchAutomation.Models"
              xmlns:vm="clr-namespace:OneTouchAutomation.ViewModels"
              mc:Ignorable="d" d:DesignWidth="1000" d:DesignHeight="650"
-             x:Class="OneTouchAutomation.Views.Page.GamePage"
+             x:Class="OneTouchAutomation.Views.GamePage"
              x:DataType="vm:GamePageViewModel"
              x:CompileBindings="True"
              Background="Transparent">

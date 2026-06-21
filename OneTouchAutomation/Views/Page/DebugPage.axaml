@@ -2,8 +2,20 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-             xmlns:page="clr-namespace:OneTouchAutomation.Views.Page"
+             xmlns:vm="clr-namespace:OneTouchAutomation.ViewModels"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
-             x:Class="OneTouchAutomation.Views.Page.DebugPage">
-    DebugPage
+             x:Class="OneTouchAutomation.Views.DebugPage"
+             x:DataType="vm:DebugPageViewModel">
+    <Design.DataContext>
+        <vm:DebugPageViewModel />
+    </Design.DataContext>
+
+    <TabControl Margin="10">
+        <TabItem Header="选项卡1">
+            <TextBlock Margin="5">这是标签页 1的内容</TextBlock>
+        </TabItem>
+        <TabItem Header="选项卡2">
+            <TextBlock Margin="5">这是标签页 2的内容</TextBlock>
+        </TabItem>
+    </TabControl>
 </UserControl>

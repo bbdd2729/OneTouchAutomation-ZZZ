@@ -3,7 +3,6 @@ using Avalonia.Controls.Templates;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.DependencyInjection;
 using OneTouchAutomation.ViewModels;
-using OneTouchAutomation.Views.Page;
 
 namespace OneTouchAutomation.Views;
 
