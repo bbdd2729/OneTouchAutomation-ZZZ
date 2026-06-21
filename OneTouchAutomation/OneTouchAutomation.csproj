@@ -4,6 +4,7 @@
         <TargetFramework>net9.0-windows</TargetFramework>
         <Nullable>enable</Nullable>
         <ApplicationManifest>app.manifest</ApplicationManifest>
+        <UseWindowsForms>true</UseWindowsForms>
         <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
     </PropertyGroup>
 

@@ -9,4 +9,6 @@ public static class Icon
     public const string Refresh    = "\uE72C";
     public const string Game       = "\uE7FC";
     public const string Debug      = "\uEBE8";
+    public const string Vision     = "\uF19D";
+    public const string Behavior   = "\uF271";
 }

@@ -1,6 +1,7 @@
 using Avalonia.Controls.ApplicationLifetimes;
 using CommunityToolkit.Mvvm.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection;
+using OneTouchAutomation.Services.Capture;
 using OneTouchAutomation.ViewModels;
 using OneTouchAutomation.Views;
 
@@ -18,6 +19,7 @@ public class App : Application
         var services = new ServiceCollection();
         ConfigureViewModels(services);
         ConfigureViews(services);
+        ConfigureServices(services);
 
         var provider = services.BuildServiceProvider();
 
@@ -47,6 +49,8 @@ public class App : Application
         services.AddTransient<SettingsPageViewModel>();
         services.AddTransient<InfoPageViewModel>();
         services.AddTransient<DebugPageViewModel>();
+        services.AddTransient<VisionDebugViewModel>();
+        services.AddTransient<BehaviorDebugViewModel>();
     }
 
     internal static void ConfigureViews(IServiceCollection services)
@@ -57,5 +61,10 @@ public class App : Application
         services.AddTransient<SettingsPage>();
         services.AddTransient<InfoPage>();
         services.AddTransient<DebugPage>();
+    }
+
+    internal static void ConfigureServices(IServiceCollection services)
+    {
+        services.AddSingleton<IScreenCaptureService, ScreenCaptureService>();
     }
 }

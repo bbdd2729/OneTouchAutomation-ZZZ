@@ -1,0 +1,115 @@
+﻿<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:viewModels="clr-namespace:OneTouchAutomation.ViewModels"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="OneTouchAutomation.Views.VisionDebugPage"
+             x:DataType="viewModels:VisionDebugViewModel">
+    <Design.DataContext>
+        <viewModels:VisionDebugViewModel />
+    </Design.DataContext>
+    <Grid RowDefinitions="Auto,*,120"
+          RowSpacing="14">
+        <StackPanel Orientation="Horizontal"
+                    Spacing="10">
+            <Button Content="Capture Screen"
+                    Command="{Binding CaptureScreenCommand}" />
+
+            <Button Content="Load Template"
+                    Command="{Binding LoadTemplateCommand}" />
+
+            <Button Content="Run Match"
+                    Command="{Binding RunMatchCommand}" />
+        </StackPanel>
+
+        <Grid Grid.Row="1"
+              ColumnDefinitions="*,320"
+              ColumnSpacing="14">
+            <Border CornerRadius="8"
+                    BorderBrush="#24FFFFFF"
+                    BorderThickness="1"
+                    Background="#14000000">
+                <ScrollViewer HorizontalScrollBarVisibility="Auto"
+                              VerticalScrollBarVisibility="Auto">
+                    <Image Source="{Binding PreviewImage}"
+                           Stretch="Uniform" />
+                </ScrollViewer>
+            </Border>
+
+            <Border Grid.Column="1"
+                    CornerRadius="8"
+                    Padding="16"
+                    BorderBrush="#24FFFFFF"
+                    BorderThickness="1"
+                    Background="#1CFFFFFF">
+                <StackPanel Spacing="14">
+                    <StackPanel Spacing="6">
+                        <TextBlock Text="Screenshot"
+                                   FontWeight="SemiBold" />
+                        <TextBlock Text="{Binding ScreenshotInfo}"
+                                   Foreground="#B8C7D8"
+                                   TextWrapping="Wrap" />
+                    </StackPanel>
+
+                    <StackPanel Spacing="6">
+                        <TextBlock Text="Template path"
+                                   FontWeight="SemiBold" />
+                        <TextBox Text="{Binding TemplatePath, Mode=TwoWay}"
+                                 PlaceholderText="C:\path\template.png" />
+                    </StackPanel>
+
+                    <StackPanel Spacing="6">
+                        <TextBlock Text="Template preview"
+                                   FontWeight="SemiBold" />
+                        <Border Height="120"
+                                CornerRadius="6"
+                                BorderBrush="#24FFFFFF"
+                                BorderThickness="1"
+                                Background="#10000000">
+                            <Image Source="{Binding TemplateImage}"
+                                   Stretch="Uniform" />
+                        </Border>
+                    </StackPanel>
+
+                    <StackPanel Spacing="8">
+                        <Grid ColumnDefinitions="*,Auto">
+                            <TextBlock Text="Threshold" />
+                            <TextBlock Grid.Column="1"
+                                       Text="{Binding Threshold, StringFormat={}{0:0.00}}" />
+                        </Grid>
+                        <Slider Minimum="0.5"
+                                Maximum="0.99"
+                                TickFrequency="0.01"
+                                Value="{Binding Threshold, Mode=TwoWay}" />
+                    </StackPanel>
+
+                    <StackPanel Spacing="6">
+                        <TextBlock Text="Result"
+                                   FontWeight="SemiBold" />
+                        <TextBlock Text="{Binding MatchResultText}"
+                                   Foreground="#B8C7D8"
+                                   TextWrapping="Wrap" />
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+        </Grid>
+
+        <Border Grid.Row="2"
+                CornerRadius="8"
+                Padding="12"
+                BorderBrush="#24FFFFFF"
+                BorderThickness="1"
+                Background="#14000000">
+            <ItemsControl ItemsSource="{Binding Logs}">
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <TextBlock Text="{Binding}"
+                                   FontSize="12"
+                                   Foreground="#B8C7D8" />
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </Border>
+    </Grid>
+</UserControl>

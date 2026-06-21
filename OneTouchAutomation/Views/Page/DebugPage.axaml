@@ -4,6 +4,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:vm="clr-namespace:OneTouchAutomation.ViewModels"
              xmlns:constants="clr-namespace:OneTouchAutomation.Constants"
+             xmlns:views="clr-namespace:OneTouchAutomation.Views"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="OneTouchAutomation.Views.DebugPage"
              x:DataType="vm:DebugPageViewModel">
@@ -11,27 +12,31 @@
         <vm:DebugPageViewModel />
     </Design.DataContext>
 
-    <TabControl Margin="10">
-        <TabItem>
-            <!-- Header 中显示图标和文本 -->
-            <TabItem.Header>
-                <StackPanel Orientation="Horizontal">
-                    <TextBlock Classes="Icon" Text="{x:Static constants:Icon.Navigation}" />
-                    <TextBlock Margin="5,0,0,0">Vision Debug</TextBlock>
-                </StackPanel>
-            </TabItem.Header>
-            <!-- 内容区域 -->
-            <TextBlock>Vision Debug</TextBlock>
-        </TabItem>
+    <Grid Margin="24">
+        <TabControl>
+            <TabItem>
+                <TabItem.Header>
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                        <TextBlock Classes="Icon"
+                                   Text="{x:Static constants:Icon.Vision}" />
+                        <TextBlock Text="Vision Debug" />
+                    </StackPanel>
+                </TabItem.Header>
 
-        <TabItem>
-            <TabItem.Header>
-                <StackPanel Orientation="Horizontal">
-                    <TextBlock Classes="Icon" Text="{x:Static constants:Icon.Navigation}" />
-                    <TextBlock Margin="5,0,0,0">Behavior Debug</TextBlock>
-                </StackPanel>
-            </TabItem.Header>
-            <TextBlock>Behavior Debug</TextBlock>
-        </TabItem>
-    </TabControl>
+                <views:VisionDebugPage DataContext="{Binding VisionDebug}" />
+            </TabItem>
+
+            <TabItem>
+                <TabItem.Header>
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                        <TextBlock Classes="Icon"
+                                   Text="{x:Static constants:Icon.Behavior}" />
+                        <TextBlock Text="Behavior Debug" />
+                    </StackPanel>
+                </TabItem.Header>
+
+                <views:BehaviorDebugPage DataContext="{Binding BehaviorDebug}" />
+            </TabItem>
+        </TabControl>
+    </Grid>
 </UserControl>
