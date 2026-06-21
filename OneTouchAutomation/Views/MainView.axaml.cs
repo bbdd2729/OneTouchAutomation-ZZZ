@@ -1,6 +1,4 @@
-using System;
 using System.ComponentModel;
-using Avalonia.Controls;
 using Avalonia.Media;
 using OneTouchAutomation.ViewModels;
 
@@ -45,9 +43,9 @@ public partial class MainView : UserControl
             return;
         }
 
-        material.TintColor = appearance.AcrylicTintColor;
-        material.TintOpacity = appearance.AcrylicTintOpacity;
+        material.TintColor       = appearance.AcrylicTintColor;
+        material.TintOpacity     = appearance.AcrylicTintOpacity;
         material.MaterialOpacity = appearance.AcrylicMaterialOpacity;
-        material.FallbackColor = appearance.AcrylicFallbackColor;
+        material.FallbackColor   = appearance.AcrylicFallbackColor;
     }
 }

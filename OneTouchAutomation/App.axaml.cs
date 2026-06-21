@@ -1,8 +1,5 @@
-using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
-using Avalonia.Markup.Xaml;
 using CommunityToolkit.Mvvm.DependencyInjection;
-using DynamicData;
 using Microsoft.Extensions.DependencyInjection;
 using OneTouchAutomation.ViewModels;
 using OneTouchAutomation.Views;
@@ -12,10 +9,7 @@ namespace OneTouchAutomation;
 
 public class App : Application
 {
-    public override void Initialize()
-    {
-        AvaloniaXamlLoader.Load(this);
-    }
+    public override void Initialize() { AvaloniaXamlLoader.Load(this); }
 
     public override void OnFrameworkInitializationCompleted()
     {
@@ -25,13 +19,13 @@ public class App : Application
         var services = new ServiceCollection();
         ConfigureViewModels(services);
         ConfigureViews(services);
-        
+
         var provider = services.BuildServiceProvider();
-        
+
         Ioc.Default.ConfigureServices(provider);
 
         var vm = Ioc.Default.GetRequiredService<MainWindowViewModel>();
-        
+
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
         {
             desktop.MainWindow = new MainWindow(vm);
@@ -43,8 +37,8 @@ public class App : Application
 
         base.OnFrameworkInitializationCompleted();
     }
-    
-    
+
+
     internal static void ConfigureViewModels(IServiceCollection services)
     {
         services.AddSingleton<AppAppearanceSettings>();
@@ -55,7 +49,7 @@ public class App : Application
         services.AddTransient<InfoPageViewModel>();
         services.AddTransient<DebugPageViewModel>();
     }
-    
+
     internal static void ConfigureViews(IServiceCollection services)
     {
         services.AddSingleton<MainWindow>();

@@ -1,82 +1,77 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
-using System.Reactive.Linq;
-using Avalonia.Controls;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.DependencyInjection;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
+using OneTouchAutomation.Constants;
 using OneTouchAutomation.Models;
-using ReactiveUI.SourceGenerators;
 
 namespace OneTouchAutomation.ViewModels;
 
 public partial class MainWindowViewModel : ViewModelBase
 {
+    private readonly List<SideBarItemModel> _templates = new()
+    {
+        new SideBarItemModel
+        {
+            ModelType = typeof(HomePageViewModel),
+            IconKey   = Icon.Home,
+            Title     = "Home"
+        },
+
+        new SideBarItemModel()
+        {
+            ModelType = typeof(GamePageViewModel),
+            IconKey   = Icon.Game,
+            Title     = "Game"
+        },
+
+        new SideBarItemModel()
+        {
+            ModelType = typeof(DebugPageViewModel),
+            IconKey   = Icon.Debug,
+            Title     = "Debug"
+        },
+
+        new SideBarItemModel
+        {
+            ModelType = typeof(SettingsPageViewModel),
+            IconKey   = Icon.Settings,
+            Title     = "Settings"
+        },
+
+        new SideBarItemModel
+        {
+            ModelType = typeof(InfoPageViewModel),
+            IconKey   = Icon.Info,
+            Title     = "Info"
+        },
+    };
+
+    [ObservableProperty] private ViewModelBase _currentPage = new HomePageViewModel();
+
+    [ObservableProperty] private bool _isPaneOpen;
+
+    [ObservableProperty] private SideBarItemModel? _selectedListItem;
+
     public MainWindowViewModel(IMessenger messenger, AppAppearanceSettings appearance)
     {
         Appearance = appearance;
-        Items = new ObservableCollection<SideBarItemModel>(_templates);
+        Items      = new ObservableCollection<SideBarItemModel>(_templates);
 
         SelectedListItem = Items.First(vm => vm.ModelType == typeof(HomePageViewModel));
     }
 
     public MainWindowViewModel(AppAppearanceSettings appearance) : this(new WeakReferenceMessenger(), appearance) { }
-    
-    private readonly List<SideBarItemModel> _templates = new()
-    {
-        new SideBarItemModel
-        {
-            ModelType = typeof(HomePageViewModel), 
-            IconKey = OneTouchAutomation.Constants.Icon.Home, 
-            Title = "Home"
-        },
-        
-        new SideBarItemModel()
-        {
-            ModelType = typeof(GamePageViewModel), 
-            IconKey   = OneTouchAutomation.Constants.Icon.Game, 
-            Title     = "Game"
-        },
-        
-        new SideBarItemModel()
-        {
-            ModelType = typeof(DebugPageViewModel), 
-            IconKey   = OneTouchAutomation.Constants.Icon.Debug, 
-            Title     = "Debug"
-        },
-        
-        new SideBarItemModel
-        {
-            ModelType = typeof(SettingsPageViewModel), 
-            IconKey = OneTouchAutomation.Constants.Icon.Settings, 
-            Title = "Settings"
-        },
-        
-        new SideBarItemModel
-        {
-            ModelType = typeof(InfoPageViewModel), 
-            IconKey = OneTouchAutomation.Constants.Icon.Info, 
-            Title = "Info"
-        },
-        
-        
-        
-    };
 
     public MainWindowViewModel() : this(new WeakReferenceMessenger(), new AppAppearanceSettings()) { }
-    
-    [ObservableProperty]
-    private bool _isPaneOpen;
 
-    [ObservableProperty]
-    private ViewModelBase _currentPage = new HomePageViewModel();
+    public ObservableCollection<SideBarItemModel> Items { get; }
 
-    [ObservableProperty]
-    private SideBarItemModel? _selectedListItem;
-    
+    public AppAppearanceSettings Appearance { get; }
+
     partial void OnSelectedListItemChanged(SideBarItemModel? value)
     {
         if (value is null) return;
@@ -89,16 +84,7 @@ public partial class MainWindowViewModel : ViewModelBase
 
         CurrentPage = vmb;
     }
-    
-    public ObservableCollection<SideBarItemModel> Items { get; }
-
-    public AppAppearanceSettings Appearance { get; }
 
     [RelayCommand]
-    private void TriggerPane()
-    {
-        IsPaneOpen = !IsPaneOpen;
-    }
-
-    
+    private void TriggerPane() { IsPaneOpen = !IsPaneOpen; }
 }

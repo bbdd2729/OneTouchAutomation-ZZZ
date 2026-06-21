@@ -1,7 +1,4 @@
-﻿using System;
-using Avalonia;
-
-namespace OneTouchAutomation;
+﻿namespace OneTouchAutomation;
 
 internal sealed class Program
 {
@@ -18,8 +15,4 @@ internal sealed class Program
                      .WithDeveloperTools()
 #endif
                      .WithInterFont().LogToTrace();
-    
-    
-    
-    
 }
