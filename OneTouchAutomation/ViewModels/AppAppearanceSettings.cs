@@ -3,7 +3,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace OneTouchAutomation.ViewModels;
 
-public partial class AppAppearanceSettings : ObservableObject
+public partial class AppAppearanceSettings : ViewModelBase
 {
     [ObservableProperty]
     private Color _acrylicTintColor = Color.Parse("#24364F");
