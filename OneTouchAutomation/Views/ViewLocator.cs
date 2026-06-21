@@ -21,6 +21,7 @@ public class ViewLocator : IDataTemplate
         RegisterViewFactory<SettingsPageViewModel, SettingsPage>();
         RegisterViewFactory<InfoPageViewModel, InfoPage>();
         RegisterViewFactory<GamePageViewModel, GamePage>();
+        RegisterViewFactory<DebugPageViewModel, DebugPage>();
     }
     
     public Control Build(object? data)

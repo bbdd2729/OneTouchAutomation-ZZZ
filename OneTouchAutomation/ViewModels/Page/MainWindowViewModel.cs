@@ -41,6 +41,13 @@ public partial class MainWindowViewModel : ViewModelBase
             Title     = "Game"
         },
         
+        new SideBarItemModel()
+        {
+            ModelType = typeof(DebugPageViewModel), 
+            IconKey   = OneTouchAutomation.Constants.Icon.Debug, 
+            Title     = "Debug"
+        },
+        
         new SideBarItemModel
         {
             ModelType = typeof(SettingsPageViewModel), 

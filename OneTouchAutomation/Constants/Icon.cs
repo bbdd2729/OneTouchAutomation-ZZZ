@@ -8,4 +8,5 @@ public static class Icon
     public const string Navigation = "\uE700";
     public const string Refresh    = "\uE72C";
     public const string Game       = "\uE7FC";
+    public const string Debug      = "\uEBE8";
 }

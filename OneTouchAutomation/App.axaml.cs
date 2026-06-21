@@ -53,6 +53,7 @@ public class App : Application
         services.AddTransient<GamePageViewModel>();
         services.AddTransient<SettingsPageViewModel>();
         services.AddTransient<InfoPageViewModel>();
+        services.AddTransient<DebugPageViewModel>();
     }
     
     internal static void ConfigureViews(IServiceCollection services)
@@ -62,5 +63,6 @@ public class App : Application
         services.AddTransient<GamePage>();
         services.AddTransient<SettingsPage>();
         services.AddTransient<InfoPage>();
+        services.AddTransient<DebugPage>();
     }
 }
