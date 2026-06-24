@@ -15,6 +15,10 @@ public partial class VisionDebugViewModel : ViewModelBase
 {
     private TemplateMatchResult? _lastMatchResult;
 
+    [ObservableProperty] private CaptureWindowInfo? _selectedWindow;
+
+    [ObservableProperty] private string? _windowTitleKeyword;
+
 
     public VisionDebugViewModel
     (IScreenCaptureService screenCaptureService,
@@ -33,6 +37,25 @@ public partial class VisionDebugViewModel : ViewModelBase
 
     public ObservableCollection<string> Logs { get; } = new();
 
+    public ObservableCollection<CaptureWindowInfo> Windows { get; } = new();
+
+    [RelayCommand]
+    private async Task RefreshWindowsAsync()
+    {
+        Windows.Clear();
+
+        var windows = await _screenCaptureService.ListWindowsAsync();
+
+        foreach (var window in windows)
+        {
+            Windows.Add(window);
+        }
+
+        SelectedWindow = Windows.FirstOrDefault();
+
+        Logs.Insert(0, $"Loaded {Windows.Count} window(s).");
+    }
+
     [RelayCommand]
     private async Task CaptureScreenAsync()
     {
@@ -41,8 +64,66 @@ public partial class VisionDebugViewModel : ViewModelBase
         using var stream = new MemoryStream(CurrentFrame.PngBytes);
         PreviewImage = new Bitmap(stream);
 
-        ScreenshotInfo = $"{CurrentFrame.Width} x {CurrentFrame.Height} - {CurrentFrame.CapturedAt:HH:mm:ss}";
+        ScreenshotInfo =
+            $"{CurrentFrame.Width} x {CurrentFrame.Height} " +
+            $"- {CurrentFrame.SourceName} - {CurrentFrame.CapturedAt:HH:mm:ss}";
         Logs.Insert(0, $"Captured screen: {ScreenshotInfo}");
+    }
+
+    [RelayCommand]
+    private async Task CaptureWindowAsync()
+    {
+        if (string.IsNullOrWhiteSpace(WindowTitleKeyword))
+        {
+            Logs.Insert(0, "Window title keyword is required.");
+            return;
+        }
+
+        try
+        {
+            CurrentFrame = await _screenCaptureService.CaptureWindowAsync(WindowTitleKeyword);
+
+            using var stream = new MemoryStream(CurrentFrame.PngBytes);
+            PreviewImage = new Bitmap(stream);
+
+            ScreenshotInfo =
+                $"{CurrentFrame.Width} x {CurrentFrame.Height} - {CurrentFrame.SourceName} - {CurrentFrame.CapturedAt:HH:mm:ss}";
+
+            Logs.Insert(0, $"Captured window: {ScreenshotInfo}");
+        }
+        catch (Exception ex)
+        {
+            MatchResultText = ex.Message;
+            Logs.Insert(0, $"Capture window failed: {ex.Message}");
+        }
+    }
+
+    [RelayCommand]
+    private async Task CaptureSelectedWindowAsync()
+    {
+        if (SelectedWindow is null)
+        {
+            Logs.Insert(0, "Select a window first.");
+            return;
+        }
+
+        try
+        {
+            CurrentFrame = await _screenCaptureService.CaptureWindowAsync(SelectedWindow.Handle);
+
+            using var stream = new MemoryStream(CurrentFrame.PngBytes);
+            PreviewImage = new Bitmap(stream);
+
+            ScreenshotInfo =
+                $"{CurrentFrame.Width} x {CurrentFrame.Height} - {CurrentFrame.SourceName} - {CurrentFrame.CapturedAt:HH:mm:ss}";
+
+            Logs.Insert(0, $"Captured selected window: {ScreenshotInfo}");
+        }
+        catch (Exception ex)
+        {
+            MatchResultText = ex.Message;
+            Logs.Insert(0, $"Capture selected window failed: {ex.Message}");
+        }
     }
 
     [RelayCommand]

@@ -2,6 +2,7 @@
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
+using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
@@ -14,28 +15,11 @@ public class ScreenCaptureService : IScreenCaptureService
 {
     public Task<CapturedFrame> CaptureScreenAsync(CancellationToken cancellationToken = default)
     {
+        cancellationToken.ThrowIfCancellationRequested();
+
         Rectangle bounds = Screen.PrimaryScreen!.Bounds;
 
-        using var bitmap   = new Bitmap(bounds.Width, bounds.Height);
-        using var graphics = Graphics.FromImage(bitmap);
-        graphics.CopyFromScreen
-            (bounds.Left,
-             bounds.Top,
-             0,
-             0,
-             bitmap.Size);
-
-        using var stream = new MemoryStream();
-        bitmap.Save(stream, ImageFormat.Png);
-
-        return Task.FromResult
-            (new CapturedFrame
-            {
-                PngBytes   = stream.ToArray(),
-                Width      = bounds.Width,
-                Height     = bounds.Height,
-                CapturedAt = DateTimeOffset.Now
-            });
+        return Task.FromResult(CaptureBounds(bounds, "Primary Screen"));
     }
 
     public Task<CapturedFrame> CaptureWindowAsync
@@ -55,12 +39,7 @@ public class ScreenCaptureService : IScreenCaptureService
             throw new InvalidOperationException($"Window not found: {windowTitleKeyword}");
         }
 
-        var bounds = new Rectangle
-            (
-             window.Value.Rect.Left,
-             window.Value.Rect.Top,
-             window.Value.Rect.Right - window.Value.Rect.Left,
-             window.Value.Rect.Bottom - window.Value.Rect.Top);
+        var bounds = ToRectangle(window.Value.Rect);
 
         if (bounds.Width <= 0 || bounds.Height <= 0)
         {
@@ -72,6 +51,42 @@ public class ScreenCaptureService : IScreenCaptureService
                  (
                   bounds,
                   window.Value.Title));
+    }
+
+    public Task<IReadOnlyList<CaptureWindowInfo>> ListWindowsAsync
+    (
+        CancellationToken cancellationToken = default)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+
+        var windows = EnumerateWindows().Select(x => ToCaptureWindowInfo(x)).Where
+            (x => x.Width > 0 && x.Height > 0).OrderBy(x => x.Title).ToList();
+
+        return Task.FromResult<IReadOnlyList<CaptureWindowInfo>>(windows);
+    }
+
+    public Task<CapturedFrame> CaptureWindowAsync
+    (
+        IntPtr windowHandle,
+        CancellationToken cancellationToken = default)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+
+        var window = EnumerateWindows().FirstOrDefault(x => x.Handle == windowHandle);
+
+        if (window.Handle == IntPtr.Zero)
+        {
+            throw new InvalidOperationException("Window not found.");
+        }
+
+        var bounds = ToRectangle(window.Rect);
+
+        if (bounds.Width <= 0 || bounds.Height <= 0)
+        {
+            throw new InvalidOperationException($"Window has invalid bounds: {window.Title}");
+        }
+
+        return Task.FromResult(CaptureBounds(bounds, window.Title));
     }
 
     private static CapturedFrame CaptureBounds(Rectangle bounds, string sourceName)
@@ -104,10 +119,16 @@ public class ScreenCaptureService : IScreenCaptureService
 
     private static WindowSearchResult? FindWindowByTitleKeyword(string keyword)
     {
+        return EnumerateWindows().FirstOrDefault(x => x.Title.Contains(keyword, StringComparison.OrdinalIgnoreCase));
+    }
+
+    private static List<WindowSearchResult> EnumerateWindows()
+    {
         var windows = new List<WindowSearchResult>();
 
         EnumWindows
-            ((hWnd, _) =>
+            (
+             (hWnd, _) =>
              {
                  if (!IsWindowVisible(hWnd))
                  {
@@ -121,12 +142,15 @@ public class ScreenCaptureService : IScreenCaptureService
                      return true;
                  }
 
-                 if (!title.Contains(keyword, StringComparison.OrdinalIgnoreCase))
+                 if (!GetWindowRect(hWnd, out var rect))
                  {
                      return true;
                  }
 
-                 if (!GetWindowRect(hWnd, out var rect))
+                 var width  = rect.Right - rect.Left;
+                 var height = rect.Bottom - rect.Top;
+
+                 if (width <= 0 || height <= 0)
                  {
                      return true;
                  }
@@ -136,7 +160,7 @@ public class ScreenCaptureService : IScreenCaptureService
              },
              IntPtr.Zero);
 
-        return windows.Count > 0 ? windows[0] : null;
+        return windows;
     }
 
     private static string GetWindowTitle(IntPtr hWnd)
@@ -153,6 +177,33 @@ public class ScreenCaptureService : IScreenCaptureService
 
         return builder.ToString();
     }
+
+    private static Rectangle ToRectangle(NativeRect rect)
+    {
+        return new Rectangle
+            (
+             rect.Left,
+             rect.Top,
+             rect.Right - rect.Left,
+             rect.Bottom - rect.Top);
+    }
+
+    private static CaptureWindowInfo ToCaptureWindowInfo(WindowSearchResult window)
+    {
+        var bounds = ToRectangle(window.Rect);
+
+        return new CaptureWindowInfo
+        {
+            Handle = window.Handle,
+            Title  = window.Title,
+            X      = bounds.Left,
+            Y      = bounds.Top,
+            Width  = bounds.Width,
+            Height = bounds.Height
+        };
+    }
+
+    #region P/Invoke Declarations
 
     [DllImport("user32.dll")]
     private static extern bool EnumWindows(EnumWindowsProc lpEnumFunc, IntPtr lParam);
@@ -191,4 +242,6 @@ public class ScreenCaptureService : IScreenCaptureService
     }
 
     private delegate bool EnumWindowsProc(IntPtr hWnd, IntPtr lParam);
+
+    #endregion
 }

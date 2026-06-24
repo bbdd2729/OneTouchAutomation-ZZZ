@@ -16,6 +16,29 @@
             <Button Content="Capture Screen"
                     Command="{Binding CaptureScreenCommand}" />
 
+            <TextBox Width="180"
+                     Text="{Binding WindowTitleKeyword, Mode=TwoWay}"
+                     Watermark="Window title" />
+
+            <Button Content="Capture Window"
+                    Command="{Binding CaptureWindowCommand}" />
+
+            <Button Content="Refresh Windows"
+                    Command="{Binding RefreshWindowsCommand}" />
+
+            <ComboBox Width="240"
+                      ItemsSource="{Binding Windows}"
+                      SelectedItem="{Binding SelectedWindow, Mode=TwoWay}">
+                <ComboBox.ItemTemplate>
+                    <DataTemplate>
+                        <TextBlock Text="{Binding DisplayName}" />
+                    </DataTemplate>
+                </ComboBox.ItemTemplate>
+            </ComboBox>
+
+            <Button Content="Capture Selected"
+                    Command="{Binding CaptureSelectedWindowCommand}" />
+
             <Button Content="Load Template"
                     Command="{Binding LoadTemplateCommand}" />
 
