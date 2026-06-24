@@ -13,28 +13,8 @@ namespace OneTouchAutomation.ViewModels;
 
 public partial class VisionDebugViewModel : ViewModelBase
 {
-    private readonly IVisionDebugOutputService _debugOutputService;
-    private readonly IScreenCaptureService     _screenCaptureService;
-
-    private readonly IVisionDebugService _visionDebugService;
-
-    [ObservableProperty] private CapturedFrame? _currentFrame;
-
     private TemplateMatchResult? _lastMatchResult;
 
-    [ObservableProperty] private string _matchResultText = "No result";
-
-    [ObservableProperty] private Bitmap? _previewImage;
-
-    [ObservableProperty] private string _screenshotInfo = "No screenshot";
-
-    [ObservableProperty] private byte[]? _templateBytes;
-
-    [ObservableProperty] private Bitmap? _templateImage;
-
-    [ObservableProperty] private string? _templatePath;
-
-    [ObservableProperty] private double _threshold = 0.85;
 
     public VisionDebugViewModel
     (IScreenCaptureService screenCaptureService,
@@ -105,6 +85,12 @@ public partial class VisionDebugViewModel : ViewModelBase
                 SourceBytes   = CurrentFrame.PngBytes,
                 TemplateBytes = TemplateBytes,
                 Threshold     = Threshold,
+
+                UseRegion    = UseRegion,
+                RegionX      = RegionX,
+                RegionY      = RegionY,
+                RegionWidth  = RegionWidth,
+                RegionHeight = RegionHeight,
             });
 
         MatchResultText =
@@ -155,4 +141,48 @@ public partial class VisionDebugViewModel : ViewModelBase
 
         Logs.Insert(0, $"Saved debug output: {dir}");
     }
+
+    #region Services
+
+    private readonly IVisionDebugOutputService _debugOutputService;
+
+    private readonly IScreenCaptureService _screenCaptureService;
+
+    private readonly IVisionDebugService _visionDebugService;
+
+    #endregion
+
+    #region Bindable Properties
+
+    [ObservableProperty] private CapturedFrame? _currentFrame;
+
+    [ObservableProperty] private string _matchResultText = "No result";
+
+    [ObservableProperty] private Bitmap? _previewImage;
+
+    [ObservableProperty] private string _screenshotInfo = "No screenshot";
+
+    [ObservableProperty] private byte[]? _templateBytes;
+
+    [ObservableProperty] private Bitmap? _templateImage;
+
+    [ObservableProperty] private string? _templatePath;
+
+    [ObservableProperty] private double _threshold = 0.85;
+
+    #endregion
+
+    #region Region Selection Properties
+
+    [ObservableProperty] private bool _useRegion;
+
+    [ObservableProperty] private int _regionX;
+
+    [ObservableProperty] private int _regionY;
+
+    [ObservableProperty] private int _regionWidth = 400;
+
+    [ObservableProperty] private int _regionHeight = 300;
+
+    #endregion
 }

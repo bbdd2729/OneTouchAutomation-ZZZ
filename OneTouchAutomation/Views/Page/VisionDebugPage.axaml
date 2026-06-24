@@ -81,6 +81,30 @@
                             <TextBlock Grid.Column="1"
                                        Text="{Binding Threshold, StringFormat={}{0:0.00}}" />
                         </Grid>
+                        <CheckBox Content="Use Region"
+                                  IsChecked="{Binding UseRegion, Mode=TwoWay}" />
+
+                        <Grid ColumnDefinitions="*,*"
+                              RowDefinitions="Auto,Auto"
+                              ColumnSpacing="8"
+                              RowSpacing="8">
+                            <TextBox Text="{Binding RegionX, Mode=TwoWay}"
+                                     Watermark="X" />
+
+                            <TextBox Grid.Column="1"
+                                     Text="{Binding RegionY, Mode=TwoWay}"
+                                     Watermark="Y" />
+
+                            <TextBox Grid.Row="1"
+                                     Text="{Binding RegionWidth, Mode=TwoWay}"
+                                     Watermark="Width" />
+
+                            <TextBox Grid.Row="1"
+                                     Grid.Column="1"
+                                     Text="{Binding RegionHeight, Mode=TwoWay}"
+                                     Watermark="Height" />
+                        </Grid>
+
                         <Slider Minimum="0.5"
                                 Maximum="0.99"
                                 TickFrequency="0.01"

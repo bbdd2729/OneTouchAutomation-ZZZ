@@ -19,6 +19,7 @@ public class OpenCvVisionDebugService : IVisionDebugService
 
         using Mat  source   = Cv2.ImDecode(request.SourceBytes, ImreadModes.Color);
         using Mat? template = Cv2.ImDecode(request.TemplateBytes, ImreadModes.Color);
+        using var  debug    = source.Clone();
 
         if (source is null)
         {
@@ -40,10 +41,42 @@ public class OpenCvVisionDebugService : IVisionDebugService
                 });
         }
 
+        var searchRegion = new Rect
+            (0,
+             0,
+             source.Width,
+             source.Height);
+        var offsetX = 0;
+        var offsetY = 0;
+
+        if (request.UseRegion)
+        {
+            searchRegion = ClampRegion
+                (new Rect
+                     (
+                      request.RegionX,
+                      request.RegionY,
+                      request.RegionWidth,
+                      request.RegionHeight),
+                 source.Width,
+                 source.Height);
+
+            offsetX = searchRegion.X;
+            offsetY = searchRegion.Y;
+
+            Cv2.Rectangle
+                (debug,
+                 searchRegion,
+                 Scalar.DeepSkyBlue,
+                 2);
+        }
+
+        using var searchSource = new Mat(source, searchRegion);
+
         using var sourceGray   = new Mat();
         using var templateGray = new Mat();
 
-        Cv2.CvtColor(source, sourceGray, ColorConversionCodes.BGR2GRAY);
+        Cv2.CvtColor(searchSource, sourceGray, ColorConversionCodes.BGR2GRAY);
         Cv2.CvtColor(template, templateGray, ColorConversionCodes.BGR2GRAY);
 
         using var result = new Mat();
@@ -76,8 +109,8 @@ public class OpenCvVisionDebugService : IVisionDebugService
 
                 var bounds = new Rect
                     (
-                     x,
-                     y,
+                     x + offsetX,
+                     y + offsetY,
                      template.Width,
                      template.Height);
 
@@ -94,8 +127,6 @@ public class OpenCvVisionDebugService : IVisionDebugService
                     });
             }
         }
-
-        using var debug = source.Clone();
 
         foreach (var match in matches)
         {
@@ -147,5 +178,20 @@ public class OpenCvVisionDebugService : IVisionDebugService
 
         var minArea = Math.Min(a.Width * a.Height, b.Width * b.Height);
         return intersectionArea > minArea * 0.5;
+    }
+
+    private static Rect ClampRegion(Rect region, int sourceWidth, int sourceHeight)
+    {
+        var x = Math.Clamp(region.X, 0, sourceWidth - 1);
+        var y = Math.Clamp(region.Y, 0, sourceHeight - 1);
+
+        var width  = Math.Clamp(region.Width, 1, sourceWidth - x);
+        var height = Math.Clamp(region.Height, 1, sourceHeight - y);
+
+        return new Rect
+            (x,
+             y,
+             width,
+             height);
     }
 }
