@@ -1,9 +1,6 @@
 using Avalonia.Controls.ApplicationLifetimes;
 using CommunityToolkit.Mvvm.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection;
-using OneTouchAutomation.Services.Capture;
-using OneTouchAutomation.Services.Debug;
-using OneTouchAutomation.Services.Vision;
 using OneTouchAutomation.ViewModels;
 using OneTouchAutomation.Views;
 
@@ -46,29 +43,33 @@ public class App : Application
     {
         services.AddSingleton<AppAppearanceSettings>();
         services.AddSingleton<MainWindowViewModel>();
-        services.AddTransient<HomePageViewModel>();
-        services.AddTransient<GamePageViewModel>();
-        services.AddTransient<SettingsPageViewModel>();
-        services.AddTransient<InfoPageViewModel>();
-        services.AddTransient<DebugPageViewModel>();
-        services.AddTransient<VisionDebugViewModel>();
-        services.AddTransient<BehaviorDebugViewModel>();
+
+        services.Scan
+            (scan => scan.FromAssemblyOf<App>().AddClasses
+                 (classes => classes.AssignableTo<ViewModelBase>().Where
+                      (type =>
+                           type != typeof(AppAppearanceSettings) &&
+                           type != typeof(MainWindowViewModel))).AsSelf().WithTransientLifetime());
     }
 
     internal static void ConfigureViews(IServiceCollection services)
     {
         services.AddSingleton<MainWindow>();
-        services.AddTransient<HomePage>();
-        services.AddTransient<GamePage>();
-        services.AddTransient<SettingsPage>();
-        services.AddTransient<InfoPage>();
-        services.AddTransient<DebugPage>();
+
+        services.Scan
+            (scan => scan.FromAssemblyOf<App>().AddClasses
+                 (classes => classes.AssignableTo<UserControl>()).AsSelf().WithTransientLifetime());
     }
 
     internal static void ConfigureServices(IServiceCollection services)
     {
-        services.AddSingleton<IScreenCaptureService, ScreenCaptureService>();
-        services.AddSingleton<IVisionDebugService, OpenCvVisionDebugService>();
-        services.AddSingleton<IVisionDebugOutputService, VisionDebugOutputService>();
+        services.Scan
+            (scan => scan.FromAssemblyOf<App>().AddClasses
+                 (classes => classes.InNamespaces
+                      (
+                       "OneTouchAutomation.Services.Capture",
+                       "OneTouchAutomation.Services.Vision",
+                       "OneTouchAutomation.Services.Debug",
+                       "OneTouchAutomation.Services.Input")).AsImplementedInterfaces().WithSingletonLifetime());
     }
 }
