@@ -21,4 +21,9 @@ public interface IScreenCaptureService
     (
         IntPtr windowHandle,
         CancellationToken cancellationToken = default);
+
+    Task<CapturedFrame> CaptureWindowClientAsync
+    (
+        IntPtr windowHandle,
+        CancellationToken cancellationToken = default);
 }

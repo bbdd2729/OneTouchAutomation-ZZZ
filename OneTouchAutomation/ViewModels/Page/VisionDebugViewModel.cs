@@ -19,6 +19,12 @@ public partial class VisionDebugViewModel : ViewModelBase
 
     [ObservableProperty] private string? _windowTitleKeyword;
 
+    public ObservableCollection<string> Logs { get; } = new();
+
+    public ObservableCollection<CaptureWindowInfo> Windows { get; } = new();
+
+
+    #region Constructors
 
     public VisionDebugViewModel
     (IScreenCaptureService screenCaptureService,
@@ -35,9 +41,9 @@ public partial class VisionDebugViewModel : ViewModelBase
          new OpenCvVisionDebugService(),
          new VisionDebugOutputService()) { }
 
-    public ObservableCollection<string> Logs { get; } = new();
+    #endregion
 
-    public ObservableCollection<CaptureWindowInfo> Windows { get; } = new();
+    #region Commands
 
     [RelayCommand]
     private async Task RefreshWindowsAsync()
@@ -123,6 +129,34 @@ public partial class VisionDebugViewModel : ViewModelBase
         {
             MatchResultText = ex.Message;
             Logs.Insert(0, $"Capture selected window failed: {ex.Message}");
+        }
+    }
+
+    [RelayCommand]
+    private async Task CaptureSelectedWindowClientAsync()
+    {
+        if (SelectedWindow is null)
+        {
+            Logs.Insert(0, "Select a window first.");
+            return;
+        }
+
+        try
+        {
+            CurrentFrame = await _screenCaptureService.CaptureWindowClientAsync(SelectedWindow.Handle);
+
+            using var stream = new MemoryStream(CurrentFrame.PngBytes);
+            PreviewImage = new Bitmap(stream);
+
+            ScreenshotInfo =
+                $"{CurrentFrame.Width} x {CurrentFrame.Height} - {CurrentFrame.SourceName} - {CurrentFrame.CapturedAt:HH:mm:ss}";
+
+            Logs.Insert(0, $"Captured selected window client: {ScreenshotInfo}");
+        }
+        catch (Exception ex)
+        {
+            MatchResultText = ex.Message;
+            Logs.Insert(0, $"Capture selected window client failed: {ex.Message}");
         }
     }
 
@@ -222,6 +256,8 @@ public partial class VisionDebugViewModel : ViewModelBase
 
         Logs.Insert(0, $"Saved debug output: {dir}");
     }
+
+    #endregion
 
     #region Services
 

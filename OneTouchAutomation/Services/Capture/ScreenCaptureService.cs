@@ -13,6 +13,8 @@ namespace OneTouchAutomation.Services.Capture;
 
 public class ScreenCaptureService : IScreenCaptureService
 {
+    #region Interface Implementations
+
     public Task<CapturedFrame> CaptureScreenAsync(CancellationToken cancellationToken = default)
     {
         cancellationToken.ThrowIfCancellationRequested();
@@ -88,6 +90,54 @@ public class ScreenCaptureService : IScreenCaptureService
 
         return Task.FromResult(CaptureBounds(bounds, window.Title));
     }
+
+    public Task<CapturedFrame> CaptureWindowClientAsync
+    (
+        IntPtr windowHandle,
+        CancellationToken cancellationToken = default)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+
+        var window = EnumerateWindows().FirstOrDefault(x => x.Handle == windowHandle);
+
+        if (window.Handle == IntPtr.Zero)
+        {
+            throw new InvalidOperationException("Window not found.");
+        }
+
+        if (!GetClientRect(windowHandle, out var clientRect))
+        {
+            throw new InvalidOperationException($"Failed to get client rect: {window.Title}");
+        }
+
+        var clientTopLeft = new NativePoint(0, 0);
+
+        if (!ClientToScreen(windowHandle, ref clientTopLeft))
+        {
+            throw new InvalidOperationException($"Failed to convert client position: {window.Title}");
+        }
+
+        var width  = clientRect.Right - clientRect.Left;
+        var height = clientRect.Bottom - clientRect.Top;
+
+        if (width <= 0 || height <= 0)
+        {
+            throw new InvalidOperationException($"Window client area has invalid bounds: {window.Title}");
+        }
+
+        var bounds = new Rectangle
+            (
+             clientTopLeft.X,
+             clientTopLeft.Y,
+             width,
+             height);
+
+        return Task.FromResult(CaptureBounds(bounds, $"{window.Title} Client"));
+    }
+
+    #endregion
+
+    #region Private Helper Methods
 
     private static CapturedFrame CaptureBounds(Rectangle bounds, string sourceName)
     {
@@ -203,6 +253,8 @@ public class ScreenCaptureService : IScreenCaptureService
         };
     }
 
+    #endregion
+
     #region P/Invoke Declarations
 
     [DllImport("user32.dll")]
@@ -219,6 +271,12 @@ public class ScreenCaptureService : IScreenCaptureService
 
     [DllImport("user32.dll")]
     private static extern bool GetWindowRect(IntPtr hWnd, out NativeRect lpRect);
+
+    [DllImport("user32.dll")]
+    private static extern bool GetClientRect(IntPtr hWnd, out NativeRect lpRect);
+
+    [DllImport("user32.dll")]
+    private static extern bool ClientToScreen(IntPtr hWnd, ref NativePoint lpPoint);
 
     private readonly record struct WindowSearchResult(
         IntPtr Handle,
@@ -238,6 +296,18 @@ public class ScreenCaptureService : IScreenCaptureService
             Top    = top;
             Right  = right;
             Bottom = bottom;
+        }
+    }
+
+    private struct NativePoint
+    {
+        public int X;
+        public int Y;
+
+        public NativePoint(int x, int y)
+        {
+            X = x;
+            Y = y;
         }
     }
 

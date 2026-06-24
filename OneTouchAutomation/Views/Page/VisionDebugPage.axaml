@@ -39,6 +39,9 @@
             <Button Content="Capture Selected"
                     Command="{Binding CaptureSelectedWindowCommand}" />
 
+            <Button Content="Capture Client"
+                    Command="{Binding CaptureSelectedWindowClientCommand}" />
+
             <Button Content="Load Template"
                     Command="{Binding LoadTemplateCommand}" />
 
