@@ -7,6 +7,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using OneTouchAutomation.Services.Capture;
 using OneTouchAutomation.Services.Debug;
+using OneTouchAutomation.Services.Input;
 using OneTouchAutomation.Services.Vision;
 
 namespace OneTouchAutomation.ViewModels;
@@ -29,17 +30,20 @@ public partial class VisionDebugViewModel : ViewModelBase
     public VisionDebugViewModel
     (IScreenCaptureService screenCaptureService,
      IVisionDebugService visionDebugService,
-     IVisionDebugOutputService visionDebugOutputService)
+     IVisionDebugOutputService visionDebugOutputService,
+     IInputService inputService)
     {
         _screenCaptureService = screenCaptureService;
         _visionDebugService   = visionDebugService;
         _debugOutputService   = visionDebugOutputService;
+        _inputService         = inputService;
     }
 
     public VisionDebugViewModel() : this
         (new ScreenCaptureService(),
          new OpenCvVisionDebugService(),
-         new VisionDebugOutputService()) { }
+         new VisionDebugOutputService(),
+         new WindowsInputService()) { }
 
     #endregion
 
@@ -223,6 +227,42 @@ public partial class VisionDebugViewModel : ViewModelBase
     }
 
     [RelayCommand]
+    private async Task ClickBestMatchAsync()
+    {
+        if (CurrentFrame is null)
+        {
+            Logs.Insert(0, "Capture screen first.");
+            return;
+        }
+
+        if (_lastMatchResult is null || !_lastMatchResult.IsMatch)
+        {
+            Logs.Insert(0, "Run match first.");
+            return;
+        }
+
+        var bounds = _lastMatchResult.MatchBounds;
+
+        var screenX = CurrentFrame.SourceX + bounds.X + bounds.Width / 2;
+        var screenY = CurrentFrame.SourceY + bounds.Y + bounds.Height / 2;
+
+        try
+        {
+            await _inputService.ClickMatchCenterAsync(CurrentFrame, _lastMatchResult);
+
+            Logs.Insert
+                (
+                 0,
+                 $"Clicked best match: screen=({screenX}, {screenY}), local=({bounds.X + bounds.Width / 2}, {bounds.Y + bounds.Height / 2})");
+        }
+        catch (Exception ex)
+        {
+            MatchResultText = ex.Message;
+            Logs.Insert(0, $"Click best match failed: {ex.Message}");
+        }
+    }
+
+    [RelayCommand]
     private async Task SaveDebugOutputAsync()
     {
         if (CurrentFrame is null)
@@ -266,6 +306,8 @@ public partial class VisionDebugViewModel : ViewModelBase
     private readonly IScreenCaptureService _screenCaptureService;
 
     private readonly IVisionDebugService _visionDebugService;
+
+    private readonly IInputService _inputService;
 
     #endregion
 

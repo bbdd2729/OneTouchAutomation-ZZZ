@@ -48,6 +48,9 @@
             <Button Content="Run Match"
                     Command="{Binding RunMatchCommand}" />
 
+            <Button Content="Click Best Match"
+                    Command="{Binding ClickBestMatchCommand}" />
+
             <Button Content="Save Debug Output"
                     Command="{Binding SaveDebugOutputCommand}" />
         </StackPanel>
