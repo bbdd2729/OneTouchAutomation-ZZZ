@@ -21,6 +21,9 @@
 
             <Button Content="Run Match"
                     Command="{Binding RunMatchCommand}" />
+
+            <Button Content="Save Debug Output"
+                    Command="{Binding SaveDebugOutputCommand}" />
         </StackPanel>
 
         <Grid Grid.Row="1"

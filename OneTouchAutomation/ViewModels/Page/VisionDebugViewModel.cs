@@ -1,21 +1,26 @@
 ﻿using System.Collections.ObjectModel;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using Avalonia.Media.Imaging;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using OneTouchAutomation.Services.Capture;
+using OneTouchAutomation.Services.Debug;
 using OneTouchAutomation.Services.Vision;
 
 namespace OneTouchAutomation.ViewModels;
 
 public partial class VisionDebugViewModel : ViewModelBase
 {
-    private readonly IScreenCaptureService _screenCaptureService;
+    private readonly IVisionDebugOutputService _debugOutputService;
+    private readonly IScreenCaptureService     _screenCaptureService;
 
     private readonly IVisionDebugService _visionDebugService;
 
     [ObservableProperty] private CapturedFrame? _currentFrame;
+
+    private TemplateMatchResult? _lastMatchResult;
 
     [ObservableProperty] private string _matchResultText = "No result";
 
@@ -31,13 +36,20 @@ public partial class VisionDebugViewModel : ViewModelBase
 
     [ObservableProperty] private double _threshold = 0.85;
 
-    public VisionDebugViewModel(IScreenCaptureService screenCaptureService, IVisionDebugService visionDebugService)
+    public VisionDebugViewModel
+    (IScreenCaptureService screenCaptureService,
+     IVisionDebugService visionDebugService,
+     IVisionDebugOutputService visionDebugOutputService)
     {
         _screenCaptureService = screenCaptureService;
         _visionDebugService   = visionDebugService;
+        _debugOutputService   = visionDebugOutputService;
     }
 
-    public VisionDebugViewModel() : this(new ScreenCaptureService(), new OpenCvVisionDebugService()) { }
+    public VisionDebugViewModel() : this
+        (new ScreenCaptureService(),
+         new OpenCvVisionDebugService(),
+         new VisionDebugOutputService()) { }
 
     public ObservableCollection<string> Logs { get; } = new();
 
@@ -100,10 +112,47 @@ public partial class VisionDebugViewModel : ViewModelBase
 
         Logs.Insert(0, MatchResultText);
 
-        if (result.MatchedRegionBytes is not null)
+        _lastMatchResult = result;
+
+        if (result.DebugImagePngBytes is not null)
         {
-            using var stream = new MemoryStream(result.MatchedRegionBytes);
+            using var stream = new MemoryStream(result.DebugImagePngBytes);
             PreviewImage = new Bitmap(stream);
         }
+    }
+
+    [RelayCommand]
+    private async Task SaveDebugOutputAsync()
+    {
+        if (CurrentFrame is null)
+        {
+            Logs.Insert(0, "Capture screen first.");
+            return;
+        }
+
+        if (TemplateBytes is null)
+        {
+            Logs.Insert(0, "Load template first.");
+            return;
+        }
+
+        if (_lastMatchResult is null)
+        {
+            Logs.Insert(0, "Run match first.");
+            return;
+        }
+
+        var dir = await _debugOutputService.SaveAsync
+            (new VisionDebugOutputRequest
+            {
+                Frame         = CurrentFrame,
+                TemplateBytes = TemplateBytes,
+                TemplatePath  = TemplatePath,
+                Threshold     = Threshold,
+                Result        = _lastMatchResult,
+                Logs          = Logs.ToArray()
+            });
+
+        Logs.Insert(0, $"Saved debug output: {dir}");
     }
 }

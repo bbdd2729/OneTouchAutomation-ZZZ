@@ -10,6 +10,6 @@ public sealed class TemplateMatchResult
     public double                           MatchScore         { get; init; }
     public Rect                             MatchBounds        { get; init; }
     public IReadOnlyList<TemplateMatchItem> Matches            { get; init; } = [];
-    public byte[]?                          MatchedRegionBytes { get; init; }
+    public byte[]?                          DebugImagePngBytes { get; init; }
     public string                           Message            { get; init; } = string.Empty;
 }

@@ -128,7 +128,7 @@ public class OpenCvVisionDebugService : IVisionDebugService
                 MatchScore         = best?.MatchScore ?? 0,
                 MatchBounds        = best?.MatchBounds ?? default,
                 Matches            = matches,
-                MatchedRegionBytes = debugBytes,
+                DebugImagePngBytes = debugBytes,
                 Message = matches.Count > 0
                     ? $"Matched {matches.Count} item(s)."
                     : "No match above threshold.",
