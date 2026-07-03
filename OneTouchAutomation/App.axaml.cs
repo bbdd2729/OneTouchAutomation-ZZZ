@@ -1,6 +1,7 @@
 using Avalonia.Controls.ApplicationLifetimes;
 using CommunityToolkit.Mvvm.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection;
+using OneTouchAutomation.Services.Automation.Behavior;
 using OneTouchAutomation.ViewModels;
 using OneTouchAutomation.Views;
 
@@ -18,6 +19,7 @@ public class App : Application
         var services = new ServiceCollection();
         ConfigureViewModels(services);
         ConfigureViews(services);
+        ConfigureServices(services);
 
         var provider = services.BuildServiceProvider();
 
@@ -25,11 +27,11 @@ public class App : Application
 
         var vm = Ioc.Default.GetRequiredService<MainWindowViewModel>();
 
-        if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
+        if(ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
         {
             desktop.MainWindow = new MainWindow(vm);
         }
-        else if (ApplicationLifetime is ISingleViewApplicationLifetime singleViewApplicationLifetime)
+        else if(ApplicationLifetime is ISingleViewApplicationLifetime singleViewApplicationLifetime)
         {
             singleViewApplicationLifetime.MainView = new MainView() { DataContext = vm };
         }
@@ -42,20 +44,35 @@ public class App : Application
     {
         services.AddSingleton<AppAppearanceSettings>();
         services.AddSingleton<MainWindowViewModel>();
-        services.AddTransient<HomePageViewModel>();
-        services.AddTransient<GamePageViewModel>();
-        services.AddTransient<SettingsPageViewModel>();
-        services.AddTransient<InfoPageViewModel>();
-        services.AddTransient<DebugPageViewModel>();
+
+        services.Scan
+                (scan => scan.FromAssemblyOf<App>().AddClasses
+                         (classes => classes.AssignableTo<ViewModelBase>().Where
+                                  (type =>
+                                           type != typeof(AppAppearanceSettings) &&
+                                           type != typeof(MainWindowViewModel))).AsSelf().WithTransientLifetime());
     }
 
     internal static void ConfigureViews(IServiceCollection services)
     {
         services.AddSingleton<MainWindow>();
-        services.AddTransient<HomePage>();
-        services.AddTransient<GamePage>();
-        services.AddTransient<SettingsPage>();
-        services.AddTransient<InfoPage>();
-        services.AddTransient<DebugPage>();
+
+        services.Scan
+                (scan => scan.FromAssemblyOf<App>().AddClasses
+                         (classes => classes.AssignableTo<UserControl>()).AsSelf().WithTransientLifetime());
+    }
+
+    internal static void ConfigureServices(IServiceCollection services)
+    {
+        services.Scan
+                (scan => scan.FromAssemblyOf<App>().AddClasses
+                                      (classes => classes.InNamespaces
+                                               (
+                                                "OneTouchAutomation.Services.Capture",
+                                                "OneTouchAutomation.Services.Vision",
+                                                "OneTouchAutomation.Services.Debug",
+                                                "OneTouchAutomation.Services.Input")).AsImplementedInterfaces().
+                              WithSingletonLifetime());
+        services.AddSingleton<IAutomationBehavior<ClickTemplateBehaviorParameters>, ClickTemplateBehavior>();
     }
 }
