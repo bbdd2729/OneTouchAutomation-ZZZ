@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 
 namespace OneTouchAutomation.Services.Automation.Behavior;
 
-public interface IAutomationBehavior
+public interface IAutomationBehavior<TParameters>
 {
     string Name { get; }
 
@@ -12,5 +12,6 @@ public interface IAutomationBehavior
     Task<BehaviorExecutionResult> ExecuteAsync
     (
             BehaviorExecutionContext context,
+            TParameters parameters,
             CancellationToken cancellationToken = default(CancellationToken));
 }

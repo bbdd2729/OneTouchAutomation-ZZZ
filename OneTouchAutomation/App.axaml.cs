@@ -73,6 +73,6 @@ public class App : Application
                                                 "OneTouchAutomation.Services.Debug",
                                                 "OneTouchAutomation.Services.Input")).AsImplementedInterfaces().
                               WithSingletonLifetime());
-        services.AddTransient<ClickTemplateBehavior>();
+        services.AddSingleton<IAutomationBehavior<ClickTemplateBehaviorParameters>, ClickTemplateBehavior>();
     }
 }

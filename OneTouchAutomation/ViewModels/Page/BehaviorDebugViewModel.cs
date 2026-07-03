@@ -10,8 +10,8 @@ namespace OneTouchAutomation.ViewModels;
 
 public partial class BehaviorDebugViewModel : ViewModelBase
 {
-    private readonly ClickTemplateBehavior _clickTemplateBehavior;
-    private readonly IScreenCaptureService _screenCaptureService;
+    private readonly IAutomationBehavior<ClickTemplateBehaviorParameters> _clickTemplateBehavior;
+    private readonly IScreenCaptureService                                _screenCaptureService;
 
     [ObservableProperty] private int _regionHeight = 300;
 
@@ -34,7 +34,7 @@ public partial class BehaviorDebugViewModel : ViewModelBase
     public BehaviorDebugViewModel
     (
             IScreenCaptureService screenCaptureService,
-            ClickTemplateBehavior clickTemplateBehavior)
+            IAutomationBehavior<ClickTemplateBehaviorParameters> clickTemplateBehavior)
     {
         _screenCaptureService  = screenCaptureService;
         _clickTemplateBehavior = clickTemplateBehavior;
@@ -73,13 +73,22 @@ public partial class BehaviorDebugViewModel : ViewModelBase
             return;
         }
 
-        _clickTemplateBehavior.TemplatePath = TemplatePath;
-        _clickTemplateBehavior.Threshold    = Threshold;
-        _clickTemplateBehavior.UseRegion    = UseRegion;
-        _clickTemplateBehavior.RegionX      = RegionX;
-        _clickTemplateBehavior.RegionY      = RegionY;
-        _clickTemplateBehavior.RegionWidth  = RegionWidth;
-        _clickTemplateBehavior.RegionHeight = RegionHeight;
+        if(string.IsNullOrWhiteSpace(TemplatePath))
+        {
+            Logs.Insert(0, "Template path is required.");
+            return;
+        }
+
+        var parameters = new ClickTemplateBehaviorParameters
+        {
+                TemplatePath = TemplatePath,
+                Threshold    = Threshold,
+                UseRegion    = UseRegion,
+                RegionX      = RegionX,
+                RegionY      = RegionY,
+                RegionWidth  = RegionWidth,
+                RegionHeight = RegionHeight
+        };
 
         var result = await _clickTemplateBehavior.ExecuteAsync
                 (
@@ -87,7 +96,8 @@ public partial class BehaviorDebugViewModel : ViewModelBase
                  {
                          WindowHandle = SelectedWindow.Handle,
                          Log          = message => Logs.Insert(0, message)
-                 });
+                 },
+                 parameters);
 
         ResultText =
                 result.IsSuccess

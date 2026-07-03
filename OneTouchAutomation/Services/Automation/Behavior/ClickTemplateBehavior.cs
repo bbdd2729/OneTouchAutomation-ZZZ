@@ -7,7 +7,7 @@ using OneTouchAutomation.Services.Vision;
 
 namespace OneTouchAutomation.Services.Automation.Behavior;
 
-public class ClickTemplateBehavior : IAutomationBehavior
+public class ClickTemplateBehavior : IAutomationBehavior<ClickTemplateBehaviorParameters>
 {
     private readonly IInputService         _inputService;
     private readonly IScreenCaptureService _screenCaptureService;
@@ -24,19 +24,6 @@ public class ClickTemplateBehavior : IAutomationBehavior
         _inputService         = inputService;
     }
 
-    public string? TemplatePath { get; set; }
-
-    public double Threshold { get; set; } = 0.85;
-
-    public bool UseRegion { get; set; }
-
-    public int RegionX { get; set; }
-
-    public int RegionY { get; set; }
-
-    public int RegionWidth { get; set; } = 400;
-
-    public int RegionHeight { get; set; } = 300;
 
     #region IAutomationBehavior Members
 
@@ -49,11 +36,12 @@ public class ClickTemplateBehavior : IAutomationBehavior
     public async Task<BehaviorExecutionResult> ExecuteAsync
     (
             BehaviorExecutionContext context,
+            ClickTemplateBehaviorParameters parameters,
             CancellationToken cancellationToken = default(CancellationToken))
     {
         cancellationToken.ThrowIfCancellationRequested();
 
-        if(string.IsNullOrWhiteSpace(TemplatePath) || !File.Exists(TemplatePath))
+        if(string.IsNullOrWhiteSpace(parameters.TemplatePath) || !File.Exists(parameters.TemplatePath))
         {
             return new BehaviorExecutionResult
             {
@@ -71,7 +59,7 @@ public class ClickTemplateBehavior : IAutomationBehavior
 
         context.Log($"Captured: {frame.Width}x{frame.Height}, source=({frame.SourceX},{frame.SourceY}).");
 
-        var templateBytes = await File.ReadAllBytesAsync(TemplatePath, cancellationToken);
+        var templateBytes = await File.ReadAllBytesAsync(parameters.TemplatePath, cancellationToken);
 
         context.Log("Running template match.");
 
@@ -81,12 +69,12 @@ public class ClickTemplateBehavior : IAutomationBehavior
                  {
                          SourceBytes   = frame.PngBytes,
                          TemplateBytes = templateBytes,
-                         Threshold     = Threshold,
-                         UseRegion     = UseRegion,
-                         RegionX       = RegionX,
-                         RegionY       = RegionY,
-                         RegionWidth   = RegionWidth,
-                         RegionHeight  = RegionHeight
+                         Threshold     = parameters.Threshold,
+                         UseRegion     = parameters.UseRegion,
+                         RegionX       = parameters.RegionX,
+                         RegionY       = parameters.RegionY,
+                         RegionWidth   = parameters.RegionWidth,
+                         RegionHeight  = parameters.RegionHeight
                  },
                  cancellationToken);
 
