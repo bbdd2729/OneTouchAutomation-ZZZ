@@ -2,7 +2,125 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
-             x:Class="OneTouchAutomation.Views.BehaviorDebugPage">
-    Welcome to Avalonia!
+             xmlns:viewModels="clr-namespace:OneTouchAutomation.ViewModels"
+             mc:Ignorable="d"
+             d:DesignWidth="800"
+             d:DesignHeight="450"
+             x:Class="OneTouchAutomation.Views.BehaviorDebugPage"
+             x:DataType="viewModels:BehaviorDebugViewModel">
+  <Design.DataContext>
+    <viewModels:BehaviorDebugViewModel />
+  </Design.DataContext>
+
+  <Grid RowDefinitions="Auto,*,120"
+        RowSpacing="14">
+    <StackPanel Orientation="Horizontal"
+                Spacing="10">
+      <Button Content="Refresh Windows"
+              Command="{Binding RefreshWindowsCommand}" />
+
+      <ComboBox Width="260"
+                ItemsSource="{Binding Windows}"
+                SelectedItem="{Binding SelectedWindow, Mode=TwoWay}">
+        <ComboBox.ItemTemplate>
+          <DataTemplate>
+            <TextBlock Text="{Binding DisplayName}" />
+          </DataTemplate>
+        </ComboBox.ItemTemplate>
+      </ComboBox>
+
+      <Button Content="Run Click Template"
+              Command="{Binding RunClickTemplateBehaviorCommand}" />
+    </StackPanel>
+
+    <Grid Grid.Row="1"
+          ColumnDefinitions="360,*"
+          ColumnSpacing="14">
+      <Border CornerRadius="8"
+              Padding="16"
+              BorderBrush="#24FFFFFF"
+              BorderThickness="1"
+              Background="#1CFFFFFF">
+        <StackPanel Spacing="14">
+          <TextBlock Text="Click Template Behavior"
+                     FontWeight="SemiBold" />
+
+          <StackPanel Spacing="6">
+            <TextBlock Text="Template path" />
+            <TextBox Text="{Binding TemplatePath, Mode=TwoWay}"
+                     Watermark="C:\path\template.png" />
+          </StackPanel>
+
+          <StackPanel Spacing="8">
+            <Grid ColumnDefinitions="*,Auto">
+              <TextBlock Text="Threshold" />
+              <TextBlock Grid.Column="1"
+                         Text="{Binding Threshold, StringFormat={}{0:0.00}}" />
+            </Grid>
+
+            <Slider Minimum="0.5"
+                    Maximum="0.99"
+                    TickFrequency="0.01"
+                    Value="{Binding Threshold, Mode=TwoWay}" />
+          </StackPanel>
+
+          <CheckBox Content="Use Region"
+                    IsChecked="{Binding UseRegion, Mode=TwoWay}" />
+
+          <Grid ColumnDefinitions="*,*"
+                RowDefinitions="Auto,Auto"
+                ColumnSpacing="8"
+                RowSpacing="8">
+            <TextBox Text="{Binding RegionX, Mode=TwoWay}"
+                     Watermark="X" />
+
+            <TextBox Grid.Column="1"
+                     Text="{Binding RegionY, Mode=TwoWay}"
+                     Watermark="Y" />
+
+            <TextBox Grid.Row="1"
+                     Text="{Binding RegionWidth, Mode=TwoWay}"
+                     Watermark="Width" />
+
+            <TextBox Grid.Row="1"
+                     Grid.Column="1"
+                     Text="{Binding RegionHeight, Mode=TwoWay}"
+                     Watermark="Height" />
+          </Grid>
+        </StackPanel>
+      </Border>
+
+      <Border Grid.Column="1"
+              CornerRadius="8"
+              Padding="16"
+              BorderBrush="#24FFFFFF"
+              BorderThickness="1"
+              Background="#14000000">
+        <StackPanel Spacing="8">
+          <TextBlock Text="Result"
+                     FontWeight="SemiBold" />
+          <TextBlock Text="{Binding ResultText}"
+                     TextWrapping="Wrap"
+                     Foreground="#B8C7D8" />
+        </StackPanel>
+      </Border>
+    </Grid>
+
+    <Border Grid.Row="2"
+            CornerRadius="8"
+            Padding="12"
+            BorderBrush="#24FFFFFF"
+            BorderThickness="1"
+            Background="#14000000">
+      <ItemsControl ItemsSource="{Binding Logs}">
+        <ItemsControl.ItemTemplate>
+          <DataTemplate>
+            <TextBlock Text="{Binding}"
+                       FontSize="12"
+                       Foreground="#B8C7D8" />
+          </DataTemplate>
+        </ItemsControl.ItemTemplate>
+      </ItemsControl>
+    </Border>
+  </Grid>
 </UserControl>
