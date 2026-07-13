@@ -39,6 +39,7 @@ public class JsonTaskConfigurationStoreTests
                     ClickRepeatCount = 3,
                     ClickIntervalMilliseconds = 120,
                     ClickHoldDurationMilliseconds = 250,
+                    WorkflowId = "daily-task",
                     IsEnabled = false
                 }
             ],
@@ -67,6 +68,7 @@ public class JsonTaskConfigurationStoreTests
             Assert.Equal(3, task.ClickRepeatCount);
             Assert.Equal(120, task.ClickIntervalMilliseconds);
             Assert.Equal(250, task.ClickHoldDurationMilliseconds);
+            Assert.Equal("daily-task", task.WorkflowId);
             Assert.False(task.IsEnabled);
         }
         finally

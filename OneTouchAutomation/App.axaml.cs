@@ -97,6 +97,11 @@ public class App : Application
             (provider => provider.GetRequiredService<DelayBehavior>());
         services.AddSingleton<IAutomationBehavior>
             (provider => provider.GetRequiredService<DelayBehavior>());
+        services.AddSingleton<RunWorkflowBehavior>();
+        services.AddSingleton<IAutomationBehavior<RunWorkflowBehaviorParameters>>
+            (provider => provider.GetRequiredService<RunWorkflowBehavior>());
+        services.AddSingleton<IAutomationBehavior>
+            (provider => provider.GetRequiredService<RunWorkflowBehavior>());
         services.AddSingleton<IBehaviorRegistry, BehaviorRegistry>();
         services.AddSingleton<ITaskRunner, TaskRunner>();
     }

@@ -16,6 +16,8 @@ public partial class AutomationTaskModel : ObservableObject
             ? "Press Key"
         : BehaviorId == "delay"
             ? "Delay"
+        : BehaviorId == "run-workflow"
+            ? "Run Workflow"
         : "Click Template";
 
     public bool RequiresTemplate => BehaviorId is "click-template" or "wait-for-template";
@@ -27,6 +29,8 @@ public partial class AutomationTaskModel : ObservableObject
     public bool IsPressKey => BehaviorId == "press-key";
 
     public bool IsDelay => BehaviorId == "delay";
+
+    public bool IsRunWorkflow => BehaviorId == "run-workflow";
 
     [ObservableProperty] private string _name = "Click template";
 
@@ -66,6 +70,8 @@ public partial class AutomationTaskModel : ObservableObject
 
     [ObservableProperty] private int _clickHoldDurationMilliseconds = 60;
 
+    [ObservableProperty] private string _workflowId = string.Empty;
+
     [ObservableProperty] private bool _isEnabled = true;
 
     partial void OnBehaviorIdChanged(string value)
@@ -76,5 +82,6 @@ public partial class AutomationTaskModel : ObservableObject
         OnPropertyChanged(nameof(IsWaitForTemplate));
         OnPropertyChanged(nameof(IsPressKey));
         OnPropertyChanged(nameof(IsDelay));
+        OnPropertyChanged(nameof(IsRunWorkflow));
     }
 }

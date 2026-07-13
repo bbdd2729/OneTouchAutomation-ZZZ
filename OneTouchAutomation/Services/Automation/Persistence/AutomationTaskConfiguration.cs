@@ -47,5 +47,7 @@ public sealed class AutomationTaskConfiguration
 
     public int ClickHoldDurationMilliseconds { get; init; } = 60;
 
+    public string WorkflowId { get; init; } = string.Empty;
+
     public bool IsEnabled { get; init; } = true;
 }
