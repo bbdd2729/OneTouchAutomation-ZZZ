@@ -69,8 +69,9 @@ public class App : Application
                 (scan => scan.FromAssemblyOf<App>().AddClasses
                                       (classes => classes.InNamespaces
                                                (
-                                                "OneTouchAutomation.Services.Capture",
-                                                "OneTouchAutomation.Services.Vision",
+                        "OneTouchAutomation.Services.Capture",
+                        "OneTouchAutomation.Services.Automation.Persistence",
+                        "OneTouchAutomation.Services.Vision",
                                                 "OneTouchAutomation.Services.Debug",
                                                 "OneTouchAutomation.Services.Input")).AsImplementedInterfaces().
                               WithSingletonLifetime());
@@ -79,6 +80,11 @@ public class App : Application
             (provider => provider.GetRequiredService<ClickTemplateBehavior>());
         services.AddSingleton<IAutomationBehavior>
             (provider => provider.GetRequiredService<ClickTemplateBehavior>());
+        services.AddSingleton<WaitForTemplateBehavior>();
+        services.AddSingleton<IAutomationBehavior<WaitForTemplateBehaviorParameters>>
+            (provider => provider.GetRequiredService<WaitForTemplateBehavior>());
+        services.AddSingleton<IAutomationBehavior>
+            (provider => provider.GetRequiredService<WaitForTemplateBehavior>());
         services.AddSingleton<IBehaviorRegistry, BehaviorRegistry>();
         services.AddSingleton<ITaskRunner, TaskRunner>();
     }

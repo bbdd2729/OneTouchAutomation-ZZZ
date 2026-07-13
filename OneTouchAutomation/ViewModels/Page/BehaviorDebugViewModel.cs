@@ -11,6 +11,7 @@ namespace OneTouchAutomation.ViewModels;
 public partial class BehaviorDebugViewModel : ViewModelBase
 {
     private readonly IAutomationBehavior<ClickTemplateBehaviorParameters> _clickTemplateBehavior;
+    private readonly IAutomationBehavior<WaitForTemplateBehaviorParameters> _waitForTemplateBehavior;
     private readonly IBehaviorRegistry                                   _behaviorRegistry;
     private readonly IScreenCaptureService                                _screenCaptureService;
 
@@ -32,16 +33,20 @@ public partial class BehaviorDebugViewModel : ViewModelBase
 
     [ObservableProperty] private double _threshold = 0.85;
 
+    [ObservableProperty] private int _timeoutSeconds = 10;
+
     [ObservableProperty] private bool _useRegion;
 
     public BehaviorDebugViewModel
     (
             IScreenCaptureService screenCaptureService,
             IAutomationBehavior<ClickTemplateBehaviorParameters> clickTemplateBehavior,
+            IAutomationBehavior<WaitForTemplateBehaviorParameters> waitForTemplateBehavior,
             IBehaviorRegistry behaviorRegistry)
     {
         _screenCaptureService  = screenCaptureService;
         _clickTemplateBehavior = clickTemplateBehavior;
+        _waitForTemplateBehavior = waitForTemplateBehavior;
         _behaviorRegistry      = behaviorRegistry;
 
         foreach(var behavior in _behaviorRegistry.Behaviors)
@@ -53,7 +58,7 @@ public partial class BehaviorDebugViewModel : ViewModelBase
     }
 
     public BehaviorDebugViewModel()
-            : this(new ScreenCaptureService(), null!, new BehaviorRegistry([])) { }
+            : this(new ScreenCaptureService(), null!, null!, new BehaviorRegistry([])) { }
 
     public ObservableCollection<IAutomationBehavior> Behaviors { get; } = new();
 
@@ -87,12 +92,6 @@ public partial class BehaviorDebugViewModel : ViewModelBase
             return;
         }
 
-        if(SelectedBehavior.Id != "click-template")
-        {
-            Logs.Insert(0, $"Behavior is not supported by this debug panel: {SelectedBehavior.Name}");
-            return;
-        }
-
         if(SelectedWindow is null)
         {
             Logs.Insert(0, "Select a window first.");
@@ -105,25 +104,27 @@ public partial class BehaviorDebugViewModel : ViewModelBase
             return;
         }
 
-        var parameters = new ClickTemplateBehaviorParameters
+        var context = new BehaviorExecutionContext
         {
-                TemplatePath = TemplatePath,
-                Threshold    = Threshold,
-                UseRegion    = UseRegion,
-                RegionX      = RegionX,
-                RegionY      = RegionY,
-                RegionWidth  = RegionWidth,
-                RegionHeight = RegionHeight
+            WindowHandle = SelectedWindow.Handle,
+            Log = message => Logs.Insert(0, message)
         };
 
-        var result = await _clickTemplateBehavior.ExecuteAsync
-                (
-                 new BehaviorExecutionContext
-                 {
-                         WindowHandle = SelectedWindow.Handle,
-                         Log          = message => Logs.Insert(0, message)
-                 },
-                 parameters);
+        BehaviorExecutionResult result;
+
+        if(SelectedBehavior.Id == "click-template")
+        {
+            result = await _clickTemplateBehavior.ExecuteAsync(context, CreateClickParameters());
+        }
+        else if(SelectedBehavior.Id == "wait-for-template")
+        {
+            result = await _waitForTemplateBehavior.ExecuteAsync(context, CreateWaitParameters());
+        }
+        else
+        {
+            Logs.Insert(0, $"Behavior is not supported by this debug panel: {SelectedBehavior.Name}");
+            return;
+        }
 
         ResultText =
                 result.IsSuccess
@@ -131,5 +132,34 @@ public partial class BehaviorDebugViewModel : ViewModelBase
                         : $"Failed. {result.Message} score={result.MatchScore:0.000}";
 
         Logs.Insert(0, ResultText);
+    }
+
+    private ClickTemplateBehaviorParameters CreateClickParameters()
+    {
+        return new ClickTemplateBehaviorParameters
+        {
+            TemplatePath = TemplatePath!,
+            Threshold = Threshold,
+            UseRegion = UseRegion,
+            RegionX = RegionX,
+            RegionY = RegionY,
+            RegionWidth = RegionWidth,
+            RegionHeight = RegionHeight
+        };
+    }
+
+    private WaitForTemplateBehaviorParameters CreateWaitParameters()
+    {
+        return new WaitForTemplateBehaviorParameters
+        {
+            TemplatePath = TemplatePath!,
+            Threshold = Threshold,
+            UseRegion = UseRegion,
+            RegionX = RegionX,
+            RegionY = RegionY,
+            RegionWidth = RegionWidth,
+            RegionHeight = RegionHeight,
+            TimeoutSeconds = TimeoutSeconds
+        };
     }
 }

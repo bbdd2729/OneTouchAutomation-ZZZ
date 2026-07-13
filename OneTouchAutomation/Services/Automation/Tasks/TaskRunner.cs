@@ -46,16 +46,31 @@ public sealed class TaskRunner : ITaskRunner
                 }
                 else
                 {
-                    behaviorResult = await behavior.ExecuteAsync
-                        (
-                         new BehaviorExecutionContext
-                         {
-                                 WindowHandle       = windowHandle,
-                                 Log                = message => log?.Invoke($"[{task.Name}] {message}"),
-                                 CancellationToken  = cancellationToken
-                         },
-                         task.Parameters,
-                         cancellationToken);
+                    try
+                    {
+                        behaviorResult = await behavior.ExecuteAsync
+                            (
+                             new BehaviorExecutionContext
+                             {
+                                     WindowHandle       = windowHandle,
+                                     Log                = message => log?.Invoke($"[{task.Name}] {message}"),
+                                     CancellationToken  = cancellationToken
+                             },
+                             task.Parameters,
+                             cancellationToken);
+                    }
+                    catch(OperationCanceledException) when(cancellationToken.IsCancellationRequested)
+                    {
+                        throw;
+                    }
+                    catch(Exception exception)
+                    {
+                        behaviorResult = new BehaviorExecutionResult
+                        {
+                            IsSuccess = false,
+                            Message = $"Unhandled behavior error: {exception.Message}"
+                        };
+                    }
                 }
 
                 stopwatch.Stop();

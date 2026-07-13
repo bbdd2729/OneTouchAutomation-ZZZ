@@ -78,6 +78,12 @@
                     Value="{Binding Threshold, Mode=TwoWay}" />
           </StackPanel>
 
+          <StackPanel Spacing="6">
+            <TextBlock Text="Wait timeout seconds" />
+            <TextBox Text="{Binding TimeoutSeconds, Mode=TwoWay}"
+                     PlaceholderText="Used by Wait For Template" />
+          </StackPanel>
+
           <CheckBox Content="Use Region"
                     IsChecked="{Binding UseRegion, Mode=TwoWay}" />
 
