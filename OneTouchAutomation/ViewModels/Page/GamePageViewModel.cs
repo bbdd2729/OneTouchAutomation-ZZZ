@@ -67,6 +67,8 @@ public partial class GamePageViewModel : ViewModelBase
 
     public IReadOnlyList<AutomationKey> AvailableKeys { get; } = Enum.GetValues<AutomationKey>();
 
+    public IReadOnlyList<MouseClickMode> AvailableClickModes { get; } = Enum.GetValues<MouseClickMode>();
+
     public ObservableCollection<string> Logs { get; } = new();
 
     public ObservableCollection<TaskRunHistoryEntry> RunHistory { get; } = new();
@@ -378,7 +380,13 @@ public partial class GamePageViewModel : ViewModelBase
                 RegionX = task.RegionX,
                 RegionY = task.RegionY,
                 RegionWidth = task.RegionWidth,
-                RegionHeight = task.RegionHeight
+                RegionHeight = task.RegionHeight,
+                ClickOffsetX = task.ClickOffsetX,
+                ClickOffsetY = task.ClickOffsetY,
+                ClickMode = task.ClickMode,
+                ClickRepeatCount = task.ClickRepeatCount,
+                ClickIntervalMilliseconds = task.ClickIntervalMilliseconds,
+                ClickHoldDurationMilliseconds = task.ClickHoldDurationMilliseconds
             },
             "wait-for-template" => new WaitForTemplateBehaviorParameters
             {
@@ -474,6 +482,12 @@ public partial class GamePageViewModel : ViewModelBase
             MaxRetryCount = task.MaxRetryCount,
             Key = task.Key,
             DelayMilliseconds = task.DelayMilliseconds,
+            ClickOffsetX = task.ClickOffsetX,
+            ClickOffsetY = task.ClickOffsetY,
+            ClickMode = task.ClickMode,
+            ClickRepeatCount = task.ClickRepeatCount,
+            ClickIntervalMilliseconds = task.ClickIntervalMilliseconds,
+            ClickHoldDurationMilliseconds = task.ClickHoldDurationMilliseconds,
             IsEnabled = task.IsEnabled
         };
     }
@@ -497,6 +511,12 @@ public partial class GamePageViewModel : ViewModelBase
             MaxRetryCount = configuration.MaxRetryCount,
             Key = configuration.Key,
             DelayMilliseconds = configuration.DelayMilliseconds,
+            ClickOffsetX = configuration.ClickOffsetX,
+            ClickOffsetY = configuration.ClickOffsetY,
+            ClickMode = configuration.ClickMode,
+            ClickRepeatCount = configuration.ClickRepeatCount,
+            ClickIntervalMilliseconds = configuration.ClickIntervalMilliseconds,
+            ClickHoldDurationMilliseconds = configuration.ClickHoldDurationMilliseconds,
             IsEnabled = configuration.IsEnabled
         };
     }
@@ -519,6 +539,12 @@ public partial class GamePageViewModel : ViewModelBase
             MaxRetryCount = source.MaxRetryCount,
             Key = source.Key,
             DelayMilliseconds = source.DelayMilliseconds,
+            ClickOffsetX = source.ClickOffsetX,
+            ClickOffsetY = source.ClickOffsetY,
+            ClickMode = source.ClickMode,
+            ClickRepeatCount = source.ClickRepeatCount,
+            ClickIntervalMilliseconds = source.ClickIntervalMilliseconds,
+            ClickHoldDurationMilliseconds = source.ClickHoldDurationMilliseconds,
             IsEnabled = source.IsEnabled
         };
     }

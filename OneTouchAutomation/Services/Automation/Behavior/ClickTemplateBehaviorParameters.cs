@@ -15,4 +15,17 @@ public sealed class ClickTemplateBehaviorParameters
     public int RegionWidth { get; init; } = 400;
 
     public int RegionHeight { get; init; } = 300;
+
+    public int ClickOffsetX { get; init; }
+
+    public int ClickOffsetY { get; init; }
+
+    public OneTouchAutomation.Services.Input.MouseClickMode ClickMode { get; init; } =
+        OneTouchAutomation.Services.Input.MouseClickMode.Single;
+
+    public int ClickRepeatCount { get; init; } = 1;
+
+    public int ClickIntervalMilliseconds { get; init; } = 100;
+
+    public int ClickHoldDurationMilliseconds { get; init; } = 60;
 }

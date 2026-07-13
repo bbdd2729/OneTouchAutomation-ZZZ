@@ -33,6 +33,12 @@ public class JsonTaskConfigurationStoreTests
                     FailurePolicy = TaskFailurePolicy.Retry,
                     MaxRetryCount = 2,
                     Key = AutomationKey.Space,
+                    ClickOffsetX = 8,
+                    ClickOffsetY = -4,
+                    ClickMode = MouseClickMode.LongPress,
+                    ClickRepeatCount = 3,
+                    ClickIntervalMilliseconds = 120,
+                    ClickHoldDurationMilliseconds = 250,
                     IsEnabled = false
                 }
             ],
@@ -55,6 +61,12 @@ public class JsonTaskConfigurationStoreTests
             Assert.Equal(TaskFailurePolicy.Retry, task.FailurePolicy);
             Assert.Equal(2, task.MaxRetryCount);
             Assert.Equal(AutomationKey.Space, task.Key);
+            Assert.Equal(8, task.ClickOffsetX);
+            Assert.Equal(-4, task.ClickOffsetY);
+            Assert.Equal(MouseClickMode.LongPress, task.ClickMode);
+            Assert.Equal(3, task.ClickRepeatCount);
+            Assert.Equal(120, task.ClickIntervalMilliseconds);
+            Assert.Equal(250, task.ClickHoldDurationMilliseconds);
             Assert.False(task.IsEnabled);
         }
         finally

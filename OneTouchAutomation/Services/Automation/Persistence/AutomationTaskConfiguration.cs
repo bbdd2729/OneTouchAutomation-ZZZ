@@ -35,5 +35,17 @@ public sealed class AutomationTaskConfiguration
 
     public int DelayMilliseconds { get; init; } = 500;
 
+    public int ClickOffsetX { get; init; }
+
+    public int ClickOffsetY { get; init; }
+
+    public MouseClickMode ClickMode { get; init; } = MouseClickMode.Single;
+
+    public int ClickRepeatCount { get; init; } = 1;
+
+    public int ClickIntervalMilliseconds { get; init; } = 100;
+
+    public int ClickHoldDurationMilliseconds { get; init; } = 60;
+
     public bool IsEnabled { get; init; } = true;
 }

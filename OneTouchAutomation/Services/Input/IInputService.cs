@@ -19,6 +19,13 @@ public interface IInputService
         int screenY,
         CancellationToken cancellationToken = default);
 
+    Task ClickAsync
+    (
+        int screenX,
+        int screenY,
+        MouseClickOptions options,
+        CancellationToken cancellationToken = default);
+
     Task PressKeyAsync
     (
         AutomationKey key,
@@ -28,5 +35,12 @@ public interface IInputService
     (
         CapturedFrame frame,
         TemplateMatchResult result,
+        CancellationToken cancellationToken = default);
+
+    Task ClickMatchAsync
+    (
+        CapturedFrame frame,
+        TemplateMatchResult result,
+        MouseClickOptions options,
         CancellationToken cancellationToken = default);
 }
