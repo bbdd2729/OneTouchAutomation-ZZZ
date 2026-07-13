@@ -73,6 +73,9 @@ public partial class GamePageViewModel : ViewModelBase
 
     [ObservableProperty]
     [NotifyCanExecuteChangedFor(nameof(RemoveTaskCommand))]
+    [NotifyCanExecuteChangedFor(nameof(DuplicateTaskCommand))]
+    [NotifyCanExecuteChangedFor(nameof(MoveTaskUpCommand))]
+    [NotifyCanExecuteChangedFor(nameof(MoveTaskDownCommand))]
     [NotifyCanExecuteChangedFor(nameof(RunAllCommand))]
     private AutomationTaskModel? _selectedTask;
 
@@ -83,6 +86,10 @@ public partial class GamePageViewModel : ViewModelBase
     [ObservableProperty]
     [NotifyCanExecuteChangedFor(nameof(RunAllCommand))]
     [NotifyCanExecuteChangedFor(nameof(CancelRunCommand))]
+    [NotifyCanExecuteChangedFor(nameof(RemoveTaskCommand))]
+    [NotifyCanExecuteChangedFor(nameof(DuplicateTaskCommand))]
+    [NotifyCanExecuteChangedFor(nameof(MoveTaskUpCommand))]
+    [NotifyCanExecuteChangedFor(nameof(MoveTaskDownCommand))]
     private bool _isRunning;
 
     [ObservableProperty] private string _runStatus = "Select a window and add a task.";
@@ -207,6 +214,60 @@ public partial class GamePageViewModel : ViewModelBase
         RunAllCommand.NotifyCanExecuteChanged();
     }
 
+    [RelayCommand(CanExecute = nameof(CanDuplicateTask))]
+    private void DuplicateTask()
+    {
+        if(SelectedTask is null)
+        {
+            return;
+        }
+
+        var index = Tasks.IndexOf(SelectedTask);
+        var duplicate = CloneTask(SelectedTask);
+
+        Tasks.Insert(index + 1, duplicate);
+        SelectedTask = duplicate;
+        RunAllCommand.NotifyCanExecuteChanged();
+    }
+
+    [RelayCommand(CanExecute = nameof(CanMoveTaskUp))]
+    private void MoveTaskUp()
+    {
+        if(SelectedTask is null)
+        {
+            return;
+        }
+
+        var index = Tasks.IndexOf(SelectedTask);
+
+        if(index <= 0)
+        {
+            return;
+        }
+
+        Tasks.Move(index, index - 1);
+        RefreshTaskOrderCommands();
+    }
+
+    [RelayCommand(CanExecute = nameof(CanMoveTaskDown))]
+    private void MoveTaskDown()
+    {
+        if(SelectedTask is null)
+        {
+            return;
+        }
+
+        var index = Tasks.IndexOf(SelectedTask);
+
+        if(index < 0 || index >= Tasks.Count - 1)
+        {
+            return;
+        }
+
+        Tasks.Move(index, index + 1);
+        RefreshTaskOrderCommands();
+    }
+
     [RelayCommand(CanExecute = nameof(CanRunAll))]
     private async Task RunAllAsync()
     {
@@ -274,6 +335,25 @@ public partial class GamePageViewModel : ViewModelBase
     private bool CanRemoveTask()
     {
         return SelectedTask is not null && !IsRunning;
+    }
+
+    private bool CanDuplicateTask()
+    {
+        return SelectedTask is not null && !IsRunning;
+    }
+
+    private bool CanMoveTaskUp()
+    {
+        return SelectedTask is not null && !IsRunning && Tasks.IndexOf(SelectedTask) > 0;
+    }
+
+    private bool CanMoveTaskDown()
+    {
+        return SelectedTask is not null
+            && !IsRunning
+            && Tasks.IndexOf(SelectedTask) is var index
+            && index >= 0
+            && index < Tasks.Count - 1;
     }
 
     private bool CanRunAll()
@@ -419,6 +499,39 @@ public partial class GamePageViewModel : ViewModelBase
             DelayMilliseconds = configuration.DelayMilliseconds,
             IsEnabled = configuration.IsEnabled
         };
+    }
+
+    private static AutomationTaskModel CloneTask(AutomationTaskModel source)
+    {
+        return new AutomationTaskModel
+        {
+            Name = $"{source.Name} Copy",
+            BehaviorId = source.BehaviorId,
+            TemplatePath = source.TemplatePath,
+            Threshold = source.Threshold,
+            UseRegion = source.UseRegion,
+            RegionX = source.RegionX,
+            RegionY = source.RegionY,
+            RegionWidth = source.RegionWidth,
+            RegionHeight = source.RegionHeight,
+            TimeoutSeconds = source.TimeoutSeconds,
+            FailurePolicy = source.FailurePolicy,
+            MaxRetryCount = source.MaxRetryCount,
+            Key = source.Key,
+            DelayMilliseconds = source.DelayMilliseconds,
+            IsEnabled = source.IsEnabled
+        };
+    }
+
+    private void RefreshTaskOrderCommands()
+    {
+        MoveTaskUpCommand.NotifyCanExecuteChanged();
+        MoveTaskDownCommand.NotifyCanExecuteChanged();
+    }
+
+    partial void OnSelectedTaskChanged(AutomationTaskModel? value)
+    {
+        RefreshTaskOrderCommands();
     }
 
     private void AddLog(string message)

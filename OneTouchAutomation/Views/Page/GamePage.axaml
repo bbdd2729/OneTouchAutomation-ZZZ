@@ -134,7 +134,8 @@
                     CornerRadius="8">
                 <Grid DataContext="{Binding SelectedTask}"
                       RowDefinitions="Auto,*">
-                    <Grid ColumnDefinitions="*,Auto">
+                    <Grid ColumnDefinitions="*,Auto,Auto,Auto,Auto"
+                          ColumnSpacing="8">
                         <StackPanel Spacing="5">
                             <TextBlock Text="Task Details"
                                        FontSize="18"
@@ -146,6 +147,18 @@
                         </StackPanel>
 
                         <Button Grid.Column="1"
+                                Content="Up"
+                                Command="{Binding $parent[UserControl].DataContext.MoveTaskUpCommand}" />
+
+                        <Button Grid.Column="2"
+                                Content="Down"
+                                Command="{Binding $parent[UserControl].DataContext.MoveTaskDownCommand}" />
+
+                        <Button Grid.Column="3"
+                                Content="Duplicate"
+                                Command="{Binding $parent[UserControl].DataContext.DuplicateTaskCommand}" />
+
+                        <Button Grid.Column="4"
                                 Content="Remove"
                                 Command="{Binding $parent[UserControl].DataContext.RemoveTaskCommand}" />
                     </Grid>
