@@ -61,6 +61,21 @@ public class TaskRunnerTests
         Assert.False(result.TaskResults[0].BehaviorResult.IsSuccess);
     }
 
+    [Fact]
+    public async Task RunAsync_ConvertsBehaviorExceptionToFailedTaskResult()
+    {
+        var registry = new BehaviorRegistry([new ThrowingBehavior()]);
+        var runner = new TaskRunner(registry);
+
+        var result = await runner.RunAsync(
+            IntPtr.Zero,
+            [CreateTask("task-throws", "throws")]);
+
+        Assert.False(result.IsSuccess);
+        var taskResult = Assert.Single(result.TaskResults);
+        Assert.Equal("Unhandled behavior error: Expected test exception.", taskResult.BehaviorResult.Message);
+    }
+
     private static AutomationTaskDefinition CreateTask(string id, string behaviorId)
     {
         return new AutomationTaskDefinition
@@ -105,6 +120,25 @@ public class TaskRunnerTests
                         IsSuccess = _shouldSucceed,
                         Message = _shouldSucceed ? "Completed." : "Failed."
                 });
+        }
+    }
+
+    private sealed class ThrowingBehavior : IAutomationBehavior
+    {
+        public string Id => "throws";
+
+        public string Name => "Throws";
+
+        public string Description => "Throws for testing.";
+
+        public Type ParameterType => typeof(object);
+
+        public Task<BehaviorExecutionResult> ExecuteAsync(
+            BehaviorExecutionContext context,
+            object parameters,
+            CancellationToken cancellationToken = default)
+        {
+            throw new InvalidOperationException("Expected test exception.");
         }
     }
 }
