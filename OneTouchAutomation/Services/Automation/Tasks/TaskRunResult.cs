@@ -9,5 +9,7 @@ public sealed class TaskRunResult
 
     public bool IsCancelled { get; init; }
 
-    public bool IsSuccess => !IsCancelled && TaskResults.All(result => result.BehaviorResult.IsSuccess);
+    public bool HasFailures => TaskResults.Any(result => !result.BehaviorResult.IsSuccess);
+
+    public bool IsSuccess => !IsCancelled && !HasFailures;
 }

@@ -11,4 +11,8 @@ public sealed class AutomationTaskDefinition
     public required object Parameters { get; init; }
 
     public bool IsEnabled { get; init; } = true;
+
+    public TaskFailurePolicy FailurePolicy { get; init; } = TaskFailurePolicy.Stop;
+
+    public int MaxRetryCount { get; init; }
 }

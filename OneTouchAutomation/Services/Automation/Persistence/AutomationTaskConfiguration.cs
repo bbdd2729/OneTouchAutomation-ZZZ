@@ -1,3 +1,6 @@
+using OneTouchAutomation.Services.Automation.Tasks;
+using OneTouchAutomation.Services.Input;
+
 namespace OneTouchAutomation.Services.Automation.Persistence;
 
 public sealed class AutomationTaskConfiguration
@@ -23,6 +26,14 @@ public sealed class AutomationTaskConfiguration
     public int RegionHeight { get; init; } = 300;
 
     public int TimeoutSeconds { get; init; } = 10;
+
+    public TaskFailurePolicy FailurePolicy { get; init; } = TaskFailurePolicy.Stop;
+
+    public int MaxRetryCount { get; init; }
+
+    public AutomationKey Key { get; init; } = AutomationKey.Enter;
+
+    public int DelayMilliseconds { get; init; } = 500;
 
     public bool IsEnabled { get; init; } = true;
 }

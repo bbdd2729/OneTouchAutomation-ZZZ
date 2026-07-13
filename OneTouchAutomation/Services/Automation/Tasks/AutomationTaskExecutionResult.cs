@@ -13,4 +13,6 @@ public sealed class AutomationTaskExecutionResult
     public required BehaviorExecutionResult BehaviorResult { get; init; }
 
     public required TimeSpan Duration { get; init; }
+
+    public required int AttemptCount { get; init; }
 }

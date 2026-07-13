@@ -70,6 +70,7 @@ public class App : Application
                                       (classes => classes.InNamespaces
                                                (
                         "OneTouchAutomation.Services.Capture",
+                        "OneTouchAutomation.Services.Automation.History",
                         "OneTouchAutomation.Services.Automation.Persistence",
                         "OneTouchAutomation.Services.Vision",
                                                 "OneTouchAutomation.Services.Debug",
@@ -85,6 +86,16 @@ public class App : Application
             (provider => provider.GetRequiredService<WaitForTemplateBehavior>());
         services.AddSingleton<IAutomationBehavior>
             (provider => provider.GetRequiredService<WaitForTemplateBehavior>());
+        services.AddSingleton<PressKeyBehavior>();
+        services.AddSingleton<IAutomationBehavior<PressKeyBehaviorParameters>>
+            (provider => provider.GetRequiredService<PressKeyBehavior>());
+        services.AddSingleton<IAutomationBehavior>
+            (provider => provider.GetRequiredService<PressKeyBehavior>());
+        services.AddSingleton<DelayBehavior>();
+        services.AddSingleton<IAutomationBehavior<DelayBehaviorParameters>>
+            (provider => provider.GetRequiredService<DelayBehavior>());
+        services.AddSingleton<IAutomationBehavior>
+            (provider => provider.GetRequiredService<DelayBehavior>());
         services.AddSingleton<IBehaviorRegistry, BehaviorRegistry>();
         services.AddSingleton<ITaskRunner, TaskRunner>();
     }
