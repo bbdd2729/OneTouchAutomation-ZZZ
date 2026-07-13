@@ -9,4 +9,12 @@ public sealed class WorkflowDefinition
     public required string Name { get; init; }
 
     public IReadOnlyList<WorkflowStepDefinition> Steps { get; init; } = [];
+
+    public IReadOnlyList<WorkflowNodeDefinition> Nodes { get; init; } = [];
+
+    public IReadOnlyList<WorkflowTransitionDefinition> Transitions { get; init; } = [];
+
+    public string? StartNodeId { get; init; }
+
+    public int MaxNodeExecutions { get; init; } = 100;
 }

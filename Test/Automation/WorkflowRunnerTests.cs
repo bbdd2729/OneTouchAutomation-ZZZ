@@ -85,6 +85,79 @@ public sealed class WorkflowRunnerTests
         Assert.Empty(result.StepResults);
     }
 
+    [Fact]
+    public async Task RunAsync_FollowsFailureTransitionAndCompletesRecoveryNode()
+    {
+        var executionOrder = new List<string>();
+        var runner = new WorkflowRunner(new BehaviorRegistry(
+        [
+            new TestWorkflowBehavior("fails", executionOrder, false),
+            new TestWorkflowBehavior("recover", executionOrder, true)
+        ]));
+
+        var result = await runner.RunAsync(
+            IntPtr.Zero,
+            new WorkflowDefinition
+            {
+                Id = "recovery-workflow",
+                Name = "Recovery Workflow",
+                StartNodeId = "check",
+                Nodes =
+                [
+                    CreateNode("check", "fails"),
+                    CreateNode("recover", "recover")
+                ],
+                Transitions =
+                [
+                    new WorkflowTransitionDefinition
+                    {
+                        FromNodeId = "check",
+                        ToNodeId = "recover",
+                        Outcome = WorkflowNodeOutcome.Failure
+                    }
+                ]
+            },
+            cancellationToken: TestContext.Current.CancellationToken);
+
+        Assert.True(result.IsSuccess);
+        Assert.Equal(WorkflowNodeOutcome.Success, result.FinalOutcome);
+        Assert.Equal(["fails", "recover"], executionOrder);
+        Assert.Equal(2, result.StepResults.Count);
+    }
+
+    [Fact]
+    public async Task RunAsync_StopsGraphWhenMaximumNodeExecutionsIsReached()
+    {
+        var executionOrder = new List<string>();
+        var runner = new WorkflowRunner(new BehaviorRegistry(
+        [new TestWorkflowBehavior("loop", executionOrder, true)]));
+
+        var result = await runner.RunAsync(
+            IntPtr.Zero,
+            new WorkflowDefinition
+            {
+                Id = "loop-workflow",
+                Name = "Loop Workflow",
+                StartNodeId = "loop",
+                MaxNodeExecutions = 2,
+                Nodes = [CreateNode("loop", "loop")],
+                Transitions =
+                [
+                    new WorkflowTransitionDefinition
+                    {
+                        FromNodeId = "loop",
+                        ToNodeId = "loop",
+                        Outcome = WorkflowNodeOutcome.Success
+                    }
+                ]
+            },
+            cancellationToken: TestContext.Current.CancellationToken);
+
+        Assert.False(result.IsSuccess);
+        Assert.Equal(WorkflowNodeOutcome.Failure, result.FinalOutcome);
+        Assert.Equal(["loop", "loop"], executionOrder);
+    }
+
     private static WorkflowDefinition CreateWorkflow(params WorkflowStepDefinition[] steps)
     {
         return new WorkflowDefinition
@@ -98,6 +171,17 @@ public sealed class WorkflowRunnerTests
     private static WorkflowStepDefinition CreateStep(string id, string behaviorId)
     {
         return new WorkflowStepDefinition
+        {
+            Id = id,
+            Name = id,
+            BehaviorId = behaviorId,
+            Parameters = new object()
+        };
+    }
+
+    private static WorkflowNodeDefinition CreateNode(string id, string behaviorId)
+    {
+        return new WorkflowNodeDefinition
         {
             Id = id,
             Name = id,

@@ -204,9 +204,10 @@ public partial class BehaviorDebugViewModel : ViewModelBase
         {
             Id = "debug-wait-click",
             Name = "Wait Then Click",
-            Steps =
+            StartNodeId = "wait-template",
+            Nodes =
             [
-                new WorkflowStepDefinition
+                new WorkflowNodeDefinition
                 {
                     Id = "wait-template",
                     Name = "Wait for template",
@@ -214,13 +215,22 @@ public partial class BehaviorDebugViewModel : ViewModelBase
                     Parameters = CreateWaitParameters(),
                     FailurePolicy = TaskFailurePolicy.Stop
                 },
-                new WorkflowStepDefinition
+                new WorkflowNodeDefinition
                 {
                     Id = "click-template",
                     Name = "Click template",
                     BehaviorId = "click-template",
                     Parameters = CreateClickParameters(),
                     FailurePolicy = TaskFailurePolicy.Stop
+                }
+            ],
+            Transitions =
+            [
+                new WorkflowTransitionDefinition
+                {
+                    FromNodeId = "wait-template",
+                    ToNodeId = "click-template",
+                    Outcome = WorkflowNodeOutcome.Success
                 }
             ]
         };

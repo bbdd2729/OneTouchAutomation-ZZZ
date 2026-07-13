@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using OneTouchAutomation.Services.Automation.Behavior;
 
 namespace OneTouchAutomation.Services.Automation.Workflows;
@@ -11,7 +10,9 @@ public sealed class WorkflowRunResult
 
     public bool IsCancelled { get; init; }
 
-    public bool IsSuccess => !IsCancelled && StepResults.All(result => result.BehaviorResult.IsSuccess);
+    public WorkflowNodeOutcome FinalOutcome { get; init; } = WorkflowNodeOutcome.Success;
+
+    public bool IsSuccess => !IsCancelled && FinalOutcome == WorkflowNodeOutcome.Success;
 }
 
 public sealed class WorkflowStepExecutionResult
@@ -27,4 +28,8 @@ public sealed class WorkflowStepExecutionResult
     public required TimeSpan Duration { get; init; }
 
     public int AttemptCount { get; init; }
+
+    public WorkflowNodeOutcome Outcome { get; init; }
+
+    public string Status { get; init; } = string.Empty;
 }
