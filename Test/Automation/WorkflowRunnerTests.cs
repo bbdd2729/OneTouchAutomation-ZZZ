@@ -158,6 +158,30 @@ public sealed class WorkflowRunnerTests
         Assert.Equal(["loop", "loop"], executionOrder);
     }
 
+    [Fact]
+    public async Task RunAsync_ReturnsFailureWithoutExecutionWhenGraphIsInvalid()
+    {
+        var executionOrder = new List<string>();
+        var runner = new WorkflowRunner(new BehaviorRegistry(
+        [new TestWorkflowBehavior("known", executionOrder, true)]));
+
+        var result = await runner.RunAsync(
+            IntPtr.Zero,
+            new WorkflowDefinition
+            {
+                Id = "invalid-workflow",
+                Name = "Invalid Workflow",
+                StartNodeId = "missing",
+                Nodes = [CreateNode("known-node", "known")]
+            },
+            cancellationToken: TestContext.Current.CancellationToken);
+
+        Assert.False(result.IsSuccess);
+        Assert.Equal(WorkflowNodeOutcome.Failure, result.FinalOutcome);
+        Assert.Empty(result.StepResults);
+        Assert.Empty(executionOrder);
+    }
+
     private static WorkflowDefinition CreateWorkflow(params WorkflowStepDefinition[] steps)
     {
         return new WorkflowDefinition

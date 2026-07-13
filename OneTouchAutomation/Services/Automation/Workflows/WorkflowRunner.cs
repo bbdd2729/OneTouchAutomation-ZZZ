@@ -13,13 +13,16 @@ public sealed class WorkflowRunner : IWorkflowRunner
 {
     private readonly IBehaviorRegistry _behaviorRegistry;
     private readonly IWindowActivationService? _windowActivationService;
+    private readonly IWorkflowValidator _workflowValidator;
 
     public WorkflowRunner(
         IBehaviorRegistry behaviorRegistry,
-        IWindowActivationService? windowActivationService = null)
+        IWindowActivationService? windowActivationService = null,
+        IWorkflowValidator? workflowValidator = null)
     {
         _behaviorRegistry = behaviorRegistry;
         _windowActivationService = windowActivationService;
+        _workflowValidator = workflowValidator ?? new WorkflowValidator(behaviorRegistry);
     }
 
     public async Task<WorkflowRunResult> RunAsync(
@@ -33,6 +36,13 @@ public sealed class WorkflowRunner : IWorkflowRunner
         try
         {
             cancellationToken.ThrowIfCancellationRequested();
+
+            var validation = _workflowValidator.Validate(workflow);
+
+            if(!validation.IsValid)
+            {
+                return FailureResult(string.Join(" ", validation.Errors), log, workflow.Name);
+            }
 
             if(_windowActivationService is not null)
             {
