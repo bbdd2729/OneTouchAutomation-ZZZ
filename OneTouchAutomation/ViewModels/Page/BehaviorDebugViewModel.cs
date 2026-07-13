@@ -11,6 +11,7 @@ namespace OneTouchAutomation.ViewModels;
 public partial class BehaviorDebugViewModel : ViewModelBase
 {
     private readonly IAutomationBehavior<ClickTemplateBehaviorParameters> _clickTemplateBehavior;
+    private readonly IBehaviorRegistry                                   _behaviorRegistry;
     private readonly IScreenCaptureService                                _screenCaptureService;
 
     [ObservableProperty] private int _regionHeight = 300;
@@ -23,6 +24,8 @@ public partial class BehaviorDebugViewModel : ViewModelBase
 
     [ObservableProperty] private string _resultText = "No result";
 
+    [ObservableProperty] private IAutomationBehavior? _selectedBehavior;
+
     [ObservableProperty] private CaptureWindowInfo? _selectedWindow;
 
     [ObservableProperty] private string? _templatePath;
@@ -34,14 +37,25 @@ public partial class BehaviorDebugViewModel : ViewModelBase
     public BehaviorDebugViewModel
     (
             IScreenCaptureService screenCaptureService,
-            IAutomationBehavior<ClickTemplateBehaviorParameters> clickTemplateBehavior)
+            IAutomationBehavior<ClickTemplateBehaviorParameters> clickTemplateBehavior,
+            IBehaviorRegistry behaviorRegistry)
     {
         _screenCaptureService  = screenCaptureService;
         _clickTemplateBehavior = clickTemplateBehavior;
+        _behaviorRegistry      = behaviorRegistry;
+
+        foreach(var behavior in _behaviorRegistry.Behaviors)
+        {
+            Behaviors.Add(behavior);
+        }
+
+        SelectedBehavior = Behaviors.FirstOrDefault();
     }
 
     public BehaviorDebugViewModel()
-            : this(new ScreenCaptureService(), null!) { }
+            : this(new ScreenCaptureService(), null!, new BehaviorRegistry([])) { }
+
+    public ObservableCollection<IAutomationBehavior> Behaviors { get; } = new();
 
     public ObservableCollection<CaptureWindowInfo> Windows { get; } = new();
 
@@ -65,8 +79,20 @@ public partial class BehaviorDebugViewModel : ViewModelBase
     }
 
     [RelayCommand]
-    private async Task RunClickTemplateBehaviorAsync()
+    private async Task RunSelectedBehaviorAsync()
     {
+        if(SelectedBehavior is null)
+        {
+            Logs.Insert(0, "Select a behavior first.");
+            return;
+        }
+
+        if(SelectedBehavior.Id != "click-template")
+        {
+            Logs.Insert(0, $"Behavior is not supported by this debug panel: {SelectedBehavior.Name}");
+            return;
+        }
+
         if(SelectedWindow is null)
         {
             Logs.Insert(0, "Select a window first.");

@@ -16,6 +16,16 @@
         RowSpacing="14">
     <StackPanel Orientation="Horizontal"
                 Spacing="10">
+      <ComboBox Width="220"
+                ItemsSource="{Binding Behaviors}"
+                SelectedItem="{Binding SelectedBehavior, Mode=TwoWay}">
+        <ComboBox.ItemTemplate>
+          <DataTemplate>
+            <TextBlock Text="{Binding Name}" />
+          </DataTemplate>
+        </ComboBox.ItemTemplate>
+      </ComboBox>
+
       <Button Content="Refresh Windows"
               Command="{Binding RefreshWindowsCommand}" />
 
@@ -29,8 +39,8 @@
         </ComboBox.ItemTemplate>
       </ComboBox>
 
-      <Button Content="Run Click Template"
-              Command="{Binding RunClickTemplateBehaviorCommand}" />
+      <Button Content="Run Selected Behavior"
+              Command="{Binding RunSelectedBehaviorCommand}" />
     </StackPanel>
 
     <Grid Grid.Row="1"
@@ -42,8 +52,12 @@
               BorderThickness="1"
               Background="#1CFFFFFF">
         <StackPanel Spacing="14">
-          <TextBlock Text="Click Template Behavior"
+          <TextBlock Text="{Binding SelectedBehavior.Name}"
                      FontWeight="SemiBold" />
+
+          <TextBlock Text="{Binding SelectedBehavior.Description}"
+                     Foreground="#B8C7D8"
+                     TextWrapping="Wrap" />
 
           <StackPanel Spacing="6">
             <TextBlock Text="Template path" />

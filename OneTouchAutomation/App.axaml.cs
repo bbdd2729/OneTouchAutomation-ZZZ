@@ -2,6 +2,7 @@ using Avalonia.Controls.ApplicationLifetimes;
 using CommunityToolkit.Mvvm.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection;
 using OneTouchAutomation.Services.Automation.Behavior;
+using OneTouchAutomation.Services.Automation.Tasks;
 using OneTouchAutomation.ViewModels;
 using OneTouchAutomation.Views;
 
@@ -73,6 +74,12 @@ public class App : Application
                                                 "OneTouchAutomation.Services.Debug",
                                                 "OneTouchAutomation.Services.Input")).AsImplementedInterfaces().
                               WithSingletonLifetime());
-        services.AddSingleton<IAutomationBehavior<ClickTemplateBehaviorParameters>, ClickTemplateBehavior>();
+        services.AddSingleton<ClickTemplateBehavior>();
+        services.AddSingleton<IAutomationBehavior<ClickTemplateBehaviorParameters>>
+            (provider => provider.GetRequiredService<ClickTemplateBehavior>());
+        services.AddSingleton<IAutomationBehavior>
+            (provider => provider.GetRequiredService<ClickTemplateBehavior>());
+        services.AddSingleton<IBehaviorRegistry, BehaviorRegistry>();
+        services.AddSingleton<ITaskRunner, TaskRunner>();
     }
 }
