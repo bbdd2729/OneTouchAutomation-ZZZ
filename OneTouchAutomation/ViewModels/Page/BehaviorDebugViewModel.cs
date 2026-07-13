@@ -5,6 +5,8 @@ using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using OneTouchAutomation.Services.Automation.Behavior;
+using OneTouchAutomation.Services.Automation.Tasks;
+using OneTouchAutomation.Services.Automation.Workflows;
 using OneTouchAutomation.Services.Capture;
 using OneTouchAutomation.Services.Input;
 
@@ -18,6 +20,7 @@ public partial class BehaviorDebugViewModel : ViewModelBase
     private readonly IAutomationBehavior<DelayBehaviorParameters> _delayBehavior;
     private readonly IBehaviorRegistry                                   _behaviorRegistry;
     private readonly IScreenCaptureService                                _screenCaptureService;
+    private readonly IWorkflowRunner                                      _workflowRunner;
 
     [ObservableProperty] private int _regionHeight = 300;
 
@@ -74,7 +77,8 @@ public partial class BehaviorDebugViewModel : ViewModelBase
             IAutomationBehavior<WaitForTemplateBehaviorParameters> waitForTemplateBehavior,
             IAutomationBehavior<PressKeyBehaviorParameters> pressKeyBehavior,
             IAutomationBehavior<DelayBehaviorParameters> delayBehavior,
-            IBehaviorRegistry behaviorRegistry)
+            IBehaviorRegistry behaviorRegistry,
+            IWorkflowRunner workflowRunner)
     {
         _screenCaptureService  = screenCaptureService;
         _clickTemplateBehavior = clickTemplateBehavior;
@@ -82,6 +86,7 @@ public partial class BehaviorDebugViewModel : ViewModelBase
         _pressKeyBehavior = pressKeyBehavior;
         _delayBehavior = delayBehavior;
         _behaviorRegistry      = behaviorRegistry;
+        _workflowRunner = workflowRunner;
 
         foreach(var behavior in _behaviorRegistry.Behaviors)
         {
@@ -92,7 +97,7 @@ public partial class BehaviorDebugViewModel : ViewModelBase
     }
 
     public BehaviorDebugViewModel()
-            : this(new ScreenCaptureService(), null!, null!, null!, null!, new BehaviorRegistry([])) { }
+            : this(new ScreenCaptureService(), null!, null!, null!, null!, new BehaviorRegistry([]), null!) { }
 
     public ObservableCollection<IAutomationBehavior> Behaviors { get; } = new();
 
@@ -176,6 +181,60 @@ public partial class BehaviorDebugViewModel : ViewModelBase
                 result.IsSuccess
                         ? $"Success. {result.Message} score={result.MatchScore:0.000}, screen=({result.ScreenX},{result.ScreenY})"
                         : $"Failed. {result.Message} score={result.MatchScore:0.000}";
+
+        Logs.Insert(0, ResultText);
+    }
+
+    [RelayCommand]
+    private async Task RunTemplateClickWorkflowAsync()
+    {
+        if(SelectedWindow is null)
+        {
+            Logs.Insert(0, "Select a window first.");
+            return;
+        }
+
+        if(string.IsNullOrWhiteSpace(TemplatePath))
+        {
+            Logs.Insert(0, "Template path is required.");
+            return;
+        }
+
+        var workflow = new WorkflowDefinition
+        {
+            Id = "debug-wait-click",
+            Name = "Wait Then Click",
+            Steps =
+            [
+                new WorkflowStepDefinition
+                {
+                    Id = "wait-template",
+                    Name = "Wait for template",
+                    BehaviorId = "wait-for-template",
+                    Parameters = CreateWaitParameters(),
+                    FailurePolicy = TaskFailurePolicy.Stop
+                },
+                new WorkflowStepDefinition
+                {
+                    Id = "click-template",
+                    Name = "Click template",
+                    BehaviorId = "click-template",
+                    Parameters = CreateClickParameters(),
+                    FailurePolicy = TaskFailurePolicy.Stop
+                }
+            ]
+        };
+
+        var result = await _workflowRunner.RunAsync(
+            SelectedWindow.Handle,
+            workflow,
+            message => Logs.Insert(0, message));
+
+        ResultText = result.IsCancelled
+            ? "Workflow cancelled."
+            : result.IsSuccess
+                ? $"Workflow completed: {result.StepResults.Count} step(s)."
+                : $"Workflow failed after {result.StepResults.Count} step(s).";
 
         Logs.Insert(0, ResultText);
     }

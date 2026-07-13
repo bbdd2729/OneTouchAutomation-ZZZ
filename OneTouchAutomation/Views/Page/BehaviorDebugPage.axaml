@@ -41,6 +41,9 @@
 
       <Button Content="Run Selected Behavior"
               Command="{Binding RunSelectedBehaviorCommand}" />
+
+      <Button Content="Wait Then Click"
+              Command="{Binding RunTemplateClickWorkflowCommand}" />
     </StackPanel>
 
     <Grid Grid.Row="1"

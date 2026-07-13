@@ -72,6 +72,7 @@ public class App : Application
                         "OneTouchAutomation.Services.Capture",
                         "OneTouchAutomation.Services.Automation.History",
                         "OneTouchAutomation.Services.Automation.Persistence",
+                        "OneTouchAutomation.Services.Automation.Workflows",
                         "OneTouchAutomation.Services.Vision",
                                                 "OneTouchAutomation.Services.Debug",
                                                 "OneTouchAutomation.Services.Input")).AsImplementedInterfaces().
