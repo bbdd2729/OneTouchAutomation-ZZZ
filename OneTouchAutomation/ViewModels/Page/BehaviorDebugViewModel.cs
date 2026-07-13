@@ -1,10 +1,12 @@
 ﻿using System.Collections.ObjectModel;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using OneTouchAutomation.Services.Automation.Behavior;
 using OneTouchAutomation.Services.Capture;
+using OneTouchAutomation.Services.Input;
 
 namespace OneTouchAutomation.ViewModels;
 
@@ -12,6 +14,8 @@ public partial class BehaviorDebugViewModel : ViewModelBase
 {
     private readonly IAutomationBehavior<ClickTemplateBehaviorParameters> _clickTemplateBehavior;
     private readonly IAutomationBehavior<WaitForTemplateBehaviorParameters> _waitForTemplateBehavior;
+    private readonly IAutomationBehavior<PressKeyBehaviorParameters> _pressKeyBehavior;
+    private readonly IAutomationBehavior<DelayBehaviorParameters> _delayBehavior;
     private readonly IBehaviorRegistry                                   _behaviorRegistry;
     private readonly IScreenCaptureService                                _screenCaptureService;
 
@@ -35,6 +39,18 @@ public partial class BehaviorDebugViewModel : ViewModelBase
 
     [ObservableProperty] private int _timeoutSeconds = 10;
 
+    [ObservableProperty] private AutomationKey _key = AutomationKey.Enter;
+
+    [ObservableProperty] private int _delayMilliseconds = 500;
+
+    [ObservableProperty] private bool _requiresTemplate = true;
+
+    [ObservableProperty] private bool _isWaitForTemplate;
+
+    [ObservableProperty] private bool _isPressKey;
+
+    [ObservableProperty] private bool _isDelay;
+
     [ObservableProperty] private bool _useRegion;
 
     public BehaviorDebugViewModel
@@ -42,11 +58,15 @@ public partial class BehaviorDebugViewModel : ViewModelBase
             IScreenCaptureService screenCaptureService,
             IAutomationBehavior<ClickTemplateBehaviorParameters> clickTemplateBehavior,
             IAutomationBehavior<WaitForTemplateBehaviorParameters> waitForTemplateBehavior,
+            IAutomationBehavior<PressKeyBehaviorParameters> pressKeyBehavior,
+            IAutomationBehavior<DelayBehaviorParameters> delayBehavior,
             IBehaviorRegistry behaviorRegistry)
     {
         _screenCaptureService  = screenCaptureService;
         _clickTemplateBehavior = clickTemplateBehavior;
         _waitForTemplateBehavior = waitForTemplateBehavior;
+        _pressKeyBehavior = pressKeyBehavior;
+        _delayBehavior = delayBehavior;
         _behaviorRegistry      = behaviorRegistry;
 
         foreach(var behavior in _behaviorRegistry.Behaviors)
@@ -58,7 +78,7 @@ public partial class BehaviorDebugViewModel : ViewModelBase
     }
 
     public BehaviorDebugViewModel()
-            : this(new ScreenCaptureService(), null!, null!, new BehaviorRegistry([])) { }
+            : this(new ScreenCaptureService(), null!, null!, null!, null!, new BehaviorRegistry([])) { }
 
     public ObservableCollection<IAutomationBehavior> Behaviors { get; } = new();
 
@@ -98,7 +118,7 @@ public partial class BehaviorDebugViewModel : ViewModelBase
             return;
         }
 
-        if(string.IsNullOrWhiteSpace(TemplatePath))
+        if(RequiresTemplate && string.IsNullOrWhiteSpace(TemplatePath))
         {
             Logs.Insert(0, "Template path is required.");
             return;
@@ -119,6 +139,18 @@ public partial class BehaviorDebugViewModel : ViewModelBase
         else if(SelectedBehavior.Id == "wait-for-template")
         {
             result = await _waitForTemplateBehavior.ExecuteAsync(context, CreateWaitParameters());
+        }
+        else if(SelectedBehavior.Id == "press-key")
+        {
+            result = await _pressKeyBehavior.ExecuteAsync(
+                context,
+                new PressKeyBehaviorParameters { Key = Key });
+        }
+        else if(SelectedBehavior.Id == "delay")
+        {
+            result = await _delayBehavior.ExecuteAsync(
+                context,
+                new DelayBehaviorParameters { DurationMilliseconds = DelayMilliseconds });
         }
         else
         {
@@ -161,5 +193,16 @@ public partial class BehaviorDebugViewModel : ViewModelBase
             RegionHeight = RegionHeight,
             TimeoutSeconds = TimeoutSeconds
         };
+    }
+
+    public IReadOnlyList<AutomationKey> AvailableKeys { get; } = Enum.GetValues<AutomationKey>();
+
+    partial void OnSelectedBehaviorChanged(IAutomationBehavior? value)
+    {
+        var behaviorId = value?.Id;
+        RequiresTemplate = behaviorId is "click-template" or "wait-for-template";
+        IsWaitForTemplate = behaviorId == "wait-for-template";
+        IsPressKey = behaviorId == "press-key";
+        IsDelay = behaviorId == "delay";
     }
 }

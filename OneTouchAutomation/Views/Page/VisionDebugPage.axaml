@@ -1,171 +1,255 @@
-﻿<UserControl xmlns="https://github.com/avaloniaui"
+<UserControl xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:constants="clr-namespace:OneTouchAutomation.Constants"
              xmlns:viewModels="clr-namespace:OneTouchAutomation.ViewModels"
-             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             mc:Ignorable="d"
+             d:DesignWidth="1000"
+             d:DesignHeight="650"
              x:Class="OneTouchAutomation.Views.VisionDebugPage"
              x:DataType="viewModels:VisionDebugViewModel">
     <Design.DataContext>
         <viewModels:VisionDebugViewModel />
     </Design.DataContext>
-    <Grid RowDefinitions="Auto,*,120"
+
+    <Grid Margin="8"
+          RowDefinitions="Auto,*,150"
           RowSpacing="14">
-        <StackPanel Orientation="Horizontal"
-                    Spacing="10">
-            <Button Content="Capture Screen"
-                    Command="{Binding CaptureScreenCommand}" />
+        <Border Padding="16"
+                BorderBrush="#24FFFFFF"
+                BorderThickness="1"
+                Background="#1CFFFFFF"
+                CornerRadius="8">
+            <Grid RowDefinitions="Auto,Auto"
+                  RowSpacing="12">
+                <StackPanel Spacing="4">
+                    <TextBlock Text="Vision Debug"
+                               FontSize="18"
+                               FontWeight="SemiBold"
+                               Foreground="#F8FBFF" />
+                    <TextBlock Text="Capture a target, adjust matching parameters, then inspect the result."
+                               FontSize="12"
+                               Foreground="#B8C7D8" />
+                </StackPanel>
 
-            <TextBox Width="180"
-                     Text="{Binding WindowTitleKeyword, Mode=TwoWay}"
-                     Watermark="Window title" />
+                <WrapPanel Grid.Row="1">
+                    <Button Margin="0 0 8 8"
+                            Height="38"
+                            Content="Capture Screen"
+                            Command="{Binding CaptureScreenCommand}" />
 
-            <Button Content="Capture Window"
-                    Command="{Binding CaptureWindowCommand}" />
+                    <TextBox Width="180"
+                             Height="38"
+                             Margin="0 0 8 8"
+                             Text="{Binding WindowTitleKeyword, Mode=TwoWay}"
+                             PlaceholderText="Window title" />
 
-            <Button Content="Refresh Windows"
-                    Command="{Binding RefreshWindowsCommand}" />
+                    <Button Margin="0 0 8 8"
+                            Height="38"
+                            Content="Capture by Title"
+                            Command="{Binding CaptureWindowCommand}" />
 
-            <ComboBox Width="240"
-                      ItemsSource="{Binding Windows}"
-                      SelectedItem="{Binding SelectedWindow, Mode=TwoWay}">
-                <ComboBox.ItemTemplate>
-                    <DataTemplate>
-                        <TextBlock Text="{Binding DisplayName}" />
-                    </DataTemplate>
-                </ComboBox.ItemTemplate>
-            </ComboBox>
+                    <Button Width="34"
+                            Height="38"
+                            Margin="0 0 8 8"
+                            Padding="0"
+                            Command="{Binding RefreshWindowsCommand}"
+                            ToolTip.Tip="Refresh windows">
+                        <TextBlock Classes="Icon"
+                                   Text="{x:Static constants:Icon.Refresh}"
+                                   HorizontalAlignment="Center"
+                                   VerticalAlignment="Center" />
+                    </Button>
 
-            <Button Content="Capture Selected"
-                    Command="{Binding CaptureSelectedWindowCommand}" />
+                    <ComboBox Width="250"
+                              Height="38"
+                              Margin="0 0 8 8"
+                              ItemsSource="{Binding Windows}"
+                              SelectedItem="{Binding SelectedWindow, Mode=TwoWay}">
+                        <ComboBox.ItemTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding DisplayName}" />
+                            </DataTemplate>
+                        </ComboBox.ItemTemplate>
+                    </ComboBox>
 
-            <Button Content="Capture Client"
-                    Command="{Binding CaptureSelectedWindowClientCommand}" />
+                    <Button Margin="0 0 8 8"
+                            Height="38"
+                            Content="Capture Window"
+                            Command="{Binding CaptureSelectedWindowCommand}" />
 
-            <Button Content="Load Template"
-                    Command="{Binding LoadTemplateCommand}" />
-
-            <Button Content="Run Match"
-                    Command="{Binding RunMatchCommand}" />
-
-            <Button Content="Click Best Match"
-                    Command="{Binding ClickBestMatchCommand}" />
-
-            <Button Content="Save Debug Output"
-                    Command="{Binding SaveDebugOutputCommand}" />
-        </StackPanel>
+                    <Button Margin="0 0 8 8"
+                            Height="38"
+                            Content="Capture Client"
+                            Command="{Binding CaptureSelectedWindowClientCommand}" />
+                </WrapPanel>
+            </Grid>
+        </Border>
 
         <Grid Grid.Row="1"
-              ColumnDefinitions="*,320"
-              ColumnSpacing="14">
-            <Border CornerRadius="8"
-                    BorderBrush="#24FFFFFF"
+              ColumnDefinitions="*,360"
+              ColumnSpacing="14"
+              MinHeight="260">
+            <Border BorderBrush="#24FFFFFF"
                     BorderThickness="1"
-                    Background="#14000000">
-                <ScrollViewer HorizontalScrollBarVisibility="Auto"
-                              VerticalScrollBarVisibility="Auto">
-                    <Image Source="{Binding PreviewImage}"
-                           Stretch="Uniform" />
-                </ScrollViewer>
+                    Background="#14000000"
+                    CornerRadius="8">
+                <Grid RowDefinitions="Auto,*">
+                    <Grid Margin="16 14 16 10"
+                          ColumnDefinitions="*,Auto">
+                        <StackPanel Spacing="3">
+                            <TextBlock Text="Preview"
+                                       FontWeight="SemiBold"
+                                       Foreground="#F8FBFF" />
+                            <TextBlock Text="{Binding ScreenshotInfo}"
+                                       FontSize="12"
+                                       Foreground="#B8C7D8"
+                                       TextTrimming="CharacterEllipsis" />
+                        </StackPanel>
+                        <TextBlock Grid.Column="1"
+                                   Text="{Binding MatchResultText}"
+                                   MaxWidth="260"
+                                   VerticalAlignment="Center"
+                                   FontSize="12"
+                                   Foreground="#B8C7D8"
+                                   TextTrimming="CharacterEllipsis" />
+                    </Grid>
+
+                    <ScrollViewer Grid.Row="1"
+                                  Margin="12 0 12 12"
+                                  HorizontalScrollBarVisibility="Auto"
+                                  VerticalScrollBarVisibility="Auto">
+                        <Image Source="{Binding PreviewImage}"
+                               Stretch="Uniform" />
+                    </ScrollViewer>
+                </Grid>
             </Border>
 
             <Border Grid.Column="1"
-                    CornerRadius="8"
                     Padding="16"
                     BorderBrush="#24FFFFFF"
                     BorderThickness="1"
-                    Background="#1CFFFFFF">
-                <StackPanel Spacing="14">
-                    <StackPanel Spacing="6">
-                        <TextBlock Text="Screenshot"
-                                   FontWeight="SemiBold" />
-                        <TextBlock Text="{Binding ScreenshotInfo}"
-                                   Foreground="#B8C7D8"
-                                   TextWrapping="Wrap" />
+                    Background="#1CFFFFFF"
+                    CornerRadius="8">
+                <ScrollViewer HorizontalScrollBarVisibility="Disabled"
+                              VerticalScrollBarVisibility="Auto">
+                    <StackPanel Spacing="18">
+                        <StackPanel Spacing="8">
+                            <TextBlock Text="Template Matching"
+                                       FontWeight="SemiBold"
+                                       Foreground="#F8FBFF" />
+                            <WrapPanel>
+                                <Button Margin="0 0 8 8"
+                                        Content="Load Template"
+                                        Command="{Binding LoadTemplateCommand}" />
+                                <Button Margin="0 0 8 8"
+                                        Content="Run Match"
+                                        Command="{Binding RunMatchCommand}" />
+                                <Button Margin="0 0 8 8"
+                                        Content="Click Best"
+                                        Command="{Binding ClickBestMatchCommand}" />
+                                <Button Margin="0 0 8 8"
+                                        Content="Save Output"
+                                        Command="{Binding SaveDebugOutputCommand}" />
+                            </WrapPanel>
+                        </StackPanel>
+
+                        <StackPanel Spacing="6">
+                            <TextBlock Text="Template path"
+                                       Foreground="#B8C7D8" />
+                            <TextBox Text="{Binding TemplatePath, Mode=TwoWay}"
+                                     PlaceholderText="C:\path\template.png" />
+                        </StackPanel>
+
+                        <StackPanel Spacing="6">
+                            <TextBlock Text="Template preview"
+                                       Foreground="#B8C7D8" />
+                            <Border Height="132"
+                                    BorderBrush="#24FFFFFF"
+                                    BorderThickness="1"
+                                    Background="#10000000"
+                                    CornerRadius="6">
+                                <Image Source="{Binding TemplateImage}"
+                                       Stretch="Uniform" />
+                            </Border>
+                        </StackPanel>
+
+                        <StackPanel Spacing="8">
+                            <Grid ColumnDefinitions="*,Auto">
+                                <TextBlock Text="Threshold"
+                                           Foreground="#F8FBFF" />
+                                <TextBlock Grid.Column="1"
+                                           Text="{Binding Threshold, StringFormat={}{0:0.00}}"
+                                           Foreground="#B8C7D8" />
+                            </Grid>
+                            <Slider Minimum="0.5"
+                                    Maximum="0.99"
+                                    TickFrequency="0.01"
+                                    Value="{Binding Threshold, Mode=TwoWay}" />
+                        </StackPanel>
+
+                        <StackPanel Spacing="8">
+                            <CheckBox Content="Use Region"
+                                      IsChecked="{Binding UseRegion, Mode=TwoWay}" />
+                            <Grid ColumnDefinitions="*,*"
+                                  RowDefinitions="Auto,Auto"
+                                  ColumnSpacing="8"
+                                  RowSpacing="8">
+                                <TextBox Text="{Binding RegionX, Mode=TwoWay}"
+                                         PlaceholderText="X" />
+                                <TextBox Grid.Column="1"
+                                         Text="{Binding RegionY, Mode=TwoWay}"
+                                         PlaceholderText="Y" />
+                                <TextBox Grid.Row="1"
+                                         Text="{Binding RegionWidth, Mode=TwoWay}"
+                                         PlaceholderText="Width" />
+                                <TextBox Grid.Row="1"
+                                         Grid.Column="1"
+                                         Text="{Binding RegionHeight, Mode=TwoWay}"
+                                         PlaceholderText="Height" />
+                            </Grid>
+                        </StackPanel>
+
+                        <StackPanel Spacing="6">
+                            <TextBlock Text="Result"
+                                       FontWeight="SemiBold"
+                                       Foreground="#F8FBFF" />
+                            <TextBlock Text="{Binding MatchResultText}"
+                                       Foreground="#B8C7D8"
+                                       TextWrapping="Wrap" />
+                        </StackPanel>
                     </StackPanel>
-
-                    <StackPanel Spacing="6">
-                        <TextBlock Text="Template path"
-                                   FontWeight="SemiBold" />
-                        <TextBox Text="{Binding TemplatePath, Mode=TwoWay}"
-                                 PlaceholderText="C:\path\template.png" />
-                    </StackPanel>
-
-                    <StackPanel Spacing="6">
-                        <TextBlock Text="Template preview"
-                                   FontWeight="SemiBold" />
-                        <Border Height="120"
-                                CornerRadius="6"
-                                BorderBrush="#24FFFFFF"
-                                BorderThickness="1"
-                                Background="#10000000">
-                            <Image Source="{Binding TemplateImage}"
-                                   Stretch="Uniform" />
-                        </Border>
-                    </StackPanel>
-
-                    <StackPanel Spacing="8">
-                        <Grid ColumnDefinitions="*,Auto">
-                            <TextBlock Text="Threshold" />
-                            <TextBlock Grid.Column="1"
-                                       Text="{Binding Threshold, StringFormat={}{0:0.00}}" />
-                        </Grid>
-                        <CheckBox Content="Use Region"
-                                  IsChecked="{Binding UseRegion, Mode=TwoWay}" />
-
-                        <Grid ColumnDefinitions="*,*"
-                              RowDefinitions="Auto,Auto"
-                              ColumnSpacing="8"
-                              RowSpacing="8">
-                            <TextBox Text="{Binding RegionX, Mode=TwoWay}"
-                                     Watermark="X" />
-
-                            <TextBox Grid.Column="1"
-                                     Text="{Binding RegionY, Mode=TwoWay}"
-                                     Watermark="Y" />
-
-                            <TextBox Grid.Row="1"
-                                     Text="{Binding RegionWidth, Mode=TwoWay}"
-                                     Watermark="Width" />
-
-                            <TextBox Grid.Row="1"
-                                     Grid.Column="1"
-                                     Text="{Binding RegionHeight, Mode=TwoWay}"
-                                     Watermark="Height" />
-                        </Grid>
-
-                        <Slider Minimum="0.5"
-                                Maximum="0.99"
-                                TickFrequency="0.01"
-                                Value="{Binding Threshold, Mode=TwoWay}" />
-                    </StackPanel>
-
-                    <StackPanel Spacing="6">
-                        <TextBlock Text="Result"
-                                   FontWeight="SemiBold" />
-                        <TextBlock Text="{Binding MatchResultText}"
-                                   Foreground="#B8C7D8"
-                                   TextWrapping="Wrap" />
-                    </StackPanel>
-                </StackPanel>
+                </ScrollViewer>
             </Border>
         </Grid>
 
         <Border Grid.Row="2"
-                CornerRadius="8"
                 Padding="12"
                 BorderBrush="#24FFFFFF"
                 BorderThickness="1"
-                Background="#14000000">
-            <ItemsControl ItemsSource="{Binding Logs}">
-                <ItemsControl.ItemTemplate>
-                    <DataTemplate>
-                        <TextBlock Text="{Binding}"
-                                   FontSize="12"
-                                   Foreground="#B8C7D8" />
-                    </DataTemplate>
-                </ItemsControl.ItemTemplate>
-            </ItemsControl>
+                Background="#14000000"
+                CornerRadius="8">
+            <Grid RowDefinitions="Auto,*"
+                  RowSpacing="8">
+                <TextBlock Text="Activity"
+                           FontWeight="SemiBold"
+                           Foreground="#F8FBFF" />
+                <ScrollViewer Grid.Row="1"
+                              HorizontalScrollBarVisibility="Disabled"
+                              VerticalScrollBarVisibility="Auto">
+                    <ItemsControl ItemsSource="{Binding Logs}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding}"
+                                           FontSize="12"
+                                           Foreground="#B8C7D8"
+                                           TextWrapping="Wrap" />
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </ScrollViewer>
+            </Grid>
         </Border>
     </Grid>
 </UserControl>

@@ -150,9 +150,11 @@
                                 Command="{Binding $parent[UserControl].DataContext.RemoveTaskCommand}" />
                     </Grid>
 
-                    <Grid Grid.Row="1"
-                          Margin="0 20 0 0"
-                          RowDefinitions="Auto,Auto,Auto,Auto,Auto"
+                    <ScrollViewer Grid.Row="1"
+                                  Margin="0 20 0 0"
+                                  HorizontalScrollBarVisibility="Disabled"
+                                  VerticalScrollBarVisibility="Auto">
+                    <Grid RowDefinitions="Auto,Auto,Auto,Auto,Auto"
                           RowSpacing="16">
                         <StackPanel Spacing="6">
                             <TextBlock Text="Task name"
@@ -177,7 +179,8 @@
                         </StackPanel>
 
                         <StackPanel Grid.Row="2"
-                                    Spacing="6">
+                                    Spacing="6"
+                                    IsVisible="{Binding RequiresTemplate}">
                             <TextBlock Text="Template path"
                                        Foreground="#B8C7D8" />
                             <TextBox Text="{Binding TemplatePath, Mode=TwoWay}"
@@ -186,27 +189,62 @@
 
                         <StackPanel Grid.Row="3"
                                     Spacing="8">
-                            <Grid ColumnDefinitions="*,Auto">
-                                <TextBlock Text="Threshold"
-                                           Foreground="#B8C7D8" />
-                                <TextBlock Grid.Column="1"
-                                           Text="{Binding Threshold, StringFormat={}{0:0.00}}"
-                                           Foreground="#B8C7D8" />
-                            </Grid>
-                            <Slider Minimum="0.5"
-                                    Maximum="0.99"
-                                    TickFrequency="0.01"
-                                    Value="{Binding Threshold, Mode=TwoWay}" />
-                            <StackPanel Spacing="6">
+                            <StackPanel Spacing="8"
+                                        IsVisible="{Binding RequiresTemplate}">
+                                <Grid ColumnDefinitions="*,Auto">
+                                    <TextBlock Text="Threshold"
+                                               Foreground="#B8C7D8" />
+                                    <TextBlock Grid.Column="1"
+                                               Text="{Binding Threshold, StringFormat={}{0:0.00}}"
+                                               Foreground="#B8C7D8" />
+                                </Grid>
+                                <Slider Minimum="0.5"
+                                        Maximum="0.99"
+                                        TickFrequency="0.01"
+                                        Value="{Binding Threshold, Mode=TwoWay}" />
+                            </StackPanel>
+                            <StackPanel Spacing="6"
+                                        IsVisible="{Binding IsWaitForTemplate}">
                                 <TextBlock Text="Wait timeout seconds"
                                            Foreground="#B8C7D8" />
                                 <TextBox Text="{Binding TimeoutSeconds, Mode=TwoWay}"
-                                         PlaceholderText="Used by Wait For Template" />
+                                         PlaceholderText="10" />
                             </StackPanel>
+                            <StackPanel Spacing="6"
+                                        IsVisible="{Binding IsPressKey}">
+                                <TextBlock Text="Key"
+                                           Foreground="#B8C7D8" />
+                                <ComboBox ItemsSource="{Binding $parent[UserControl].DataContext.AvailableKeys}"
+                                          SelectedItem="{Binding Key, Mode=TwoWay}" />
+                            </StackPanel>
+                            <StackPanel Spacing="6"
+                                        IsVisible="{Binding IsDelay}">
+                                <TextBlock Text="Delay milliseconds"
+                                           Foreground="#B8C7D8" />
+                                <TextBox Text="{Binding DelayMilliseconds, Mode=TwoWay}"
+                                         PlaceholderText="500" />
+                            </StackPanel>
+                            <Grid ColumnDefinitions="*,*"
+                                  ColumnSpacing="12">
+                                <StackPanel Spacing="6">
+                                    <TextBlock Text="Failure policy"
+                                               Foreground="#B8C7D8" />
+                                    <ComboBox ItemsSource="{Binding $parent[UserControl].DataContext.FailurePolicies}"
+                                              SelectedItem="{Binding FailurePolicy, Mode=TwoWay}" />
+                                </StackPanel>
+                                <StackPanel Grid.Column="1"
+                                            Spacing="6">
+                                    <TextBlock Text="Retry count"
+                                               Foreground="#B8C7D8" />
+                                    <TextBox Text="{Binding MaxRetryCount, Mode=TwoWay}"
+                                             PlaceholderText="Used by Retry" />
+                                </StackPanel>
+                            </Grid>
                         </StackPanel>
 
                         <StackPanel Grid.Row="4"
-                                    Spacing="8">
+                                    Spacing="8"
+                                    IsVisible="{Binding RequiresTemplate}">
                             <CheckBox Content="Use Region"
                                       IsChecked="{Binding UseRegion, Mode=TwoWay}" />
                             <Grid ColumnDefinitions="*,*"
@@ -228,6 +266,7 @@
                             </Grid>
                         </StackPanel>
                     </Grid>
+                    </ScrollViewer>
                 </Grid>
             </Border>
         </Grid>
@@ -238,17 +277,39 @@
                 BorderThickness="1"
                 Background="#14000000"
                 CornerRadius="8">
-            <ScrollViewer VerticalScrollBarVisibility="Auto">
-                <ItemsControl ItemsSource="{Binding Logs}">
-                    <ItemsControl.ItemTemplate>
-                        <DataTemplate>
-                            <TextBlock Text="{Binding}"
-                                       FontSize="12"
-                                       Foreground="#B8C7D8" />
-                        </DataTemplate>
-                    </ItemsControl.ItemTemplate>
-                </ItemsControl>
-            </ScrollViewer>
+            <Grid ColumnDefinitions="*,300"
+                  ColumnSpacing="16">
+                <ScrollViewer VerticalScrollBarVisibility="Auto">
+                    <ItemsControl ItemsSource="{Binding Logs}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding}"
+                                           FontSize="12"
+                                           Foreground="#B8C7D8" />
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </ScrollViewer>
+
+                <StackPanel Grid.Column="1"
+                            Spacing="6">
+                    <TextBlock Text="Run History"
+                               FontWeight="SemiBold"
+                               Foreground="#F8FBFF" />
+                    <ScrollViewer VerticalScrollBarVisibility="Auto">
+                        <ItemsControl ItemsSource="{Binding RunHistory}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding DisplayText}"
+                                               FontSize="12"
+                                               TextWrapping="Wrap"
+                                               Foreground="#B8C7D8" />
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </ScrollViewer>
+                </StackPanel>
+            </Grid>
         </Border>
     </Grid>
 </UserControl>
