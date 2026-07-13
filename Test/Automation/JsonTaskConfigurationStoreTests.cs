@@ -1,4 +1,6 @@
 using OneTouchAutomation.Services.Automation.Persistence;
+using OneTouchAutomation.Services.Automation.Tasks;
+using OneTouchAutomation.Services.Input;
 
 namespace Test.Automation;
 
@@ -27,11 +29,16 @@ public class JsonTaskConfigurationStoreTests
                     RegionY = 20,
                     RegionWidth = 300,
                     RegionHeight = 200,
+                    TimeoutSeconds = 15,
+                    FailurePolicy = TaskFailurePolicy.Retry,
+                    MaxRetryCount = 2,
+                    Key = AutomationKey.Space,
                     IsEnabled = false
                 }
-            ]);
+            ],
+            TestContext.Current.CancellationToken);
 
-            var loaded = await store.LoadAsync();
+            var loaded = await store.LoadAsync(TestContext.Current.CancellationToken);
 
             var task = Assert.Single(loaded);
             Assert.Equal("task-1", task.Id);
@@ -44,6 +51,10 @@ public class JsonTaskConfigurationStoreTests
             Assert.Equal(20, task.RegionY);
             Assert.Equal(300, task.RegionWidth);
             Assert.Equal(200, task.RegionHeight);
+            Assert.Equal(15, task.TimeoutSeconds);
+            Assert.Equal(TaskFailurePolicy.Retry, task.FailurePolicy);
+            Assert.Equal(2, task.MaxRetryCount);
+            Assert.Equal(AutomationKey.Space, task.Key);
             Assert.False(task.IsEnabled);
         }
         finally
@@ -61,8 +72,29 @@ public class JsonTaskConfigurationStoreTests
         var filePath = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N"), "tasks.json");
         var store = new JsonTaskConfigurationStore(filePath);
 
-        var loaded = await store.LoadAsync();
+        var loaded = await store.LoadAsync(TestContext.Current.CancellationToken);
 
         Assert.Empty(loaded);
+    }
+
+    [Fact]
+    public async Task LoadAsync_ThrowsJsonException_WhenConfigurationFileIsInvalid()
+    {
+        var directory = Path.Combine(Path.GetTempPath(), "OneTouchAutomationTests", Guid.NewGuid().ToString("N"));
+        var filePath = Path.Combine(directory, "tasks.json");
+        Directory.CreateDirectory(directory);
+        await File.WriteAllTextAsync(filePath, "not valid json", TestContext.Current.CancellationToken);
+        var store = new JsonTaskConfigurationStore(filePath);
+
+        try
+        {
+            var action = () => store.LoadAsync(TestContext.Current.CancellationToken);
+
+            await Assert.ThrowsAsync<System.Text.Json.JsonException>(action);
+        }
+        finally
+        {
+            Directory.Delete(directory, true);
+        }
     }
 }
