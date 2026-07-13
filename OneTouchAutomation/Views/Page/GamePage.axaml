@@ -4,7 +4,9 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:models="clr-namespace:OneTouchAutomation.Models"
              xmlns:vm="clr-namespace:OneTouchAutomation.ViewModels"
-             mc:Ignorable="d" d:DesignWidth="1000" d:DesignHeight="650"
+             mc:Ignorable="d"
+             d:DesignWidth="1000"
+             d:DesignHeight="650"
              x:Class="OneTouchAutomation.Views.GamePage"
              x:DataType="vm:GamePageViewModel"
              x:CompileBindings="True"
@@ -14,8 +16,8 @@
     </Design.DataContext>
 
     <Grid Margin="32"
-          RowDefinitions="Auto,*"
-          RowSpacing="24">
+          RowDefinitions="Auto,Auto,*,150"
+          RowSpacing="18">
         <Grid ColumnDefinitions="*,Auto"
               ColumnSpacing="16">
             <StackPanel Spacing="6">
@@ -23,46 +25,75 @@
                            FontSize="28"
                            FontWeight="SemiBold"
                            Foreground="#F8FBFF" />
-                <TextBlock Text="Create visual recognition behaviors and map them to automation actions."
+                <TextBlock Text="Create tasks and run them in order against a selected game window."
                            FontSize="14"
                            Foreground="#B8C7D8" />
             </StackPanel>
 
             <Button Grid.Column="1"
-                    MinWidth="132"
+                    MinWidth="118"
                     Height="38"
-                    Padding="16 0"
-                    HorizontalAlignment="Right"
-                    VerticalAlignment="Top"
-                    Command="{Binding AddBehaviorCommand}">
-                <StackPanel Orientation="Horizontal"
-                            Spacing="8">
-                    <TextBlock Text="+"
-                               FontSize="18"
-                               VerticalAlignment="Center" />
-                    <TextBlock Text="New behavior"
-                               VerticalAlignment="Center" />
-                </StackPanel>
+                    Command="{Binding AddTaskCommand}">
+                <TextBlock Text="New Task" />
             </Button>
         </Grid>
 
         <Grid Grid.Row="1"
-              ColumnDefinitions="360,*"
+              ColumnDefinitions="Auto,260,Auto,Auto,Auto,Auto,*"
+              ColumnSpacing="10">
+            <Button Content="Refresh Windows"
+                    Command="{Binding RefreshWindowsCommand}" />
+
+            <ComboBox Grid.Column="1"
+                      ItemsSource="{Binding Windows}"
+                      SelectedItem="{Binding SelectedWindow, Mode=TwoWay}">
+                <ComboBox.ItemTemplate>
+                    <DataTemplate>
+                        <TextBlock Text="{Binding DisplayName}" />
+                    </DataTemplate>
+                </ComboBox.ItemTemplate>
+            </ComboBox>
+
+            <Button Grid.Column="2"
+                    Content="Run All"
+                    Command="{Binding RunAllCommand}" />
+
+            <Button Grid.Column="3"
+                    Content="Cancel"
+                    Command="{Binding CancelRunCommand}" />
+
+            <Button Grid.Column="4"
+                    Content="Save Tasks"
+                    Command="{Binding SaveTasksCommand}" />
+
+            <Button Grid.Column="5"
+                    Content="Reload Tasks"
+                    Command="{Binding LoadTasksCommand}" />
+
+            <TextBlock Grid.Column="6"
+                       Text="{Binding RunStatus}"
+                       VerticalAlignment="Center"
+                       HorizontalAlignment="Right"
+                       Foreground="#B8C7D8" />
+        </Grid>
+
+        <Grid Grid.Row="2"
+              ColumnDefinitions="330,*"
               ColumnSpacing="18"
-              MinHeight="420">
-            <Border CornerRadius="8"
-                    BorderBrush="#24FFFFFF"
+              MinHeight="320">
+            <Border BorderBrush="#24FFFFFF"
                     BorderThickness="1"
-                    Background="#1CFFFFFF">
+                    Background="#1CFFFFFF"
+                    CornerRadius="8">
                 <Grid RowDefinitions="Auto,*">
                     <Grid Margin="18"
                           ColumnDefinitions="*,Auto">
-                        <TextBlock Text="Behaviors"
+                        <TextBlock Text="Tasks"
                                    FontSize="16"
                                    FontWeight="SemiBold"
                                    Foreground="#F8FBFF" />
                         <TextBlock Grid.Column="1"
-                                   Text="{Binding Behaviors.Count}"
+                                   Text="{Binding Tasks.Count}"
                                    Foreground="#B8C7D8" />
                     </Grid>
 
@@ -71,38 +102,22 @@
                              Padding="0"
                              Background="Transparent"
                              BorderThickness="0"
-                             ItemsSource="{Binding Behaviors}"
-                             SelectedItem="{Binding SelectedBehavior}">
-                        <ListBox.Styles>
-                            <Style Selector="ListBoxItem">
-                                <Setter Property="Margin" Value="0 0 0 8" />
-                                <Setter Property="Padding" Value="0" />
-                                <Setter Property="CornerRadius" Value="8" />
-                                <Setter Property="Background" Value="Transparent" />
-                            </Style>
-                            <Style Selector="ListBoxItem:pointerover">
-                                <Setter Property="Background" Value="#18FFFFFF" />
-                            </Style>
-                            <Style Selector="ListBoxItem:selected">
-                                <Setter Property="Background" Value="#28FFFFFF" />
-                            </Style>
-                        </ListBox.Styles>
+                             ItemsSource="{Binding Tasks}"
+                             SelectedItem="{Binding SelectedTask, Mode=TwoWay}">
                         <ListBox.ItemTemplate>
-                            <DataTemplate DataType="models:AutomationBehaviorModel">
+                            <DataTemplate DataType="models:AutomationTaskModel">
                                 <Grid Margin="12"
                                       RowDefinitions="Auto,Auto"
                                       ColumnDefinitions="*,Auto"
                                       RowSpacing="6">
                                     <TextBlock Text="{Binding Name}"
-                                               FontSize="14"
                                                FontWeight="SemiBold"
                                                Foreground="#F8FBFF" />
-                                    <ToggleSwitch Grid.Row="0" Grid.Column="1"
-                                                  IsChecked="{Binding IsEnabled}"
-                                                  VerticalAlignment="Center" />
+                                    <ToggleSwitch Grid.Column="1"
+                                                  IsChecked="{Binding IsEnabled, Mode=TwoWay}" />
                                     <TextBlock Grid.Row="1"
-                                               Grid.ColumnSpan="2" Grid.Column="0"
-                                               Text="{Binding Action}"
+                                               Grid.ColumnSpan="2"
+                                               Text="{Binding BehaviorDisplayName}"
                                                Foreground="#B8C7D8" />
                                 </Grid>
                             </DataTemplate>
@@ -112,94 +127,202 @@
             </Border>
 
             <Border Grid.Column="1"
-                    CornerRadius="8"
                     Padding="24"
                     BorderBrush="#24FFFFFF"
                     BorderThickness="1"
-                    Background="#20FFFFFF">
-                <Grid RowDefinitions="Auto,*"
-                      DataContext="{Binding SelectedBehavior}">
-                    <Grid ColumnDefinitions="*,Auto">
+                    Background="#20FFFFFF"
+                    CornerRadius="8">
+                <Grid DataContext="{Binding SelectedTask}"
+                      RowDefinitions="Auto,*">
+                    <Grid ColumnDefinitions="*,Auto,Auto,Auto,Auto"
+                          ColumnSpacing="8">
                         <StackPanel Spacing="5">
-                            <TextBlock Text="Behavior details"
+                            <TextBlock Text="Task Details"
                                        FontSize="18"
                                        FontWeight="SemiBold"
                                        Foreground="#F8FBFF" />
-                            <TextBlock Text="Configure the recognition target and operation."
+                            <TextBlock Text="Configure a template behavior for the selected task."
+                                       TextWrapping="Wrap"
                                        Foreground="#B8C7D8" />
                         </StackPanel>
 
                         <Button Grid.Column="1"
-                                MinWidth="90"
-                                Height="34"
-                                Command="{Binding $parent[UserControl].DataContext.RemoveBehaviorCommand}">
-                        </Button>
+                                Content="Up"
+                                Command="{Binding $parent[UserControl].DataContext.MoveTaskUpCommand}" />
+
+                        <Button Grid.Column="2"
+                                Content="Down"
+                                Command="{Binding $parent[UserControl].DataContext.MoveTaskDownCommand}" />
+
+                        <Button Grid.Column="3"
+                                Content="Duplicate"
+                                Command="{Binding $parent[UserControl].DataContext.DuplicateTaskCommand}" />
+
+                        <Button Grid.Column="4"
+                                Content="Remove"
+                                Command="{Binding $parent[UserControl].DataContext.RemoveTaskCommand}" />
                     </Grid>
 
-                    <Grid Grid.Row="1"
-                          Margin="0 24 0 0"
-                          RowDefinitions="Auto,Auto,Auto,Auto,Auto"
-                          RowSpacing="18">
-                        <StackPanel Spacing="7">
-                            <TextBlock Text="Name"
-                                       FontSize="13"
+                    <ScrollViewer Grid.Row="1"
+                                  Margin="0 20 0 0"
+                                  HorizontalScrollBarVisibility="Disabled"
+                                  VerticalScrollBarVisibility="Auto">
+                    <Grid RowDefinitions="Auto,Auto,Auto,Auto,Auto"
+                          RowSpacing="16">
+                        <StackPanel Spacing="6">
+                            <TextBlock Text="Task name"
                                        Foreground="#B8C7D8" />
                             <TextBox Text="{Binding Name, Mode=TwoWay}"
-                                     PlaceholderText="Behavior name" />
+                                     PlaceholderText="Task name" />
                         </StackPanel>
 
                         <StackPanel Grid.Row="1"
-                                    Spacing="7">
-                            <TextBlock Text="Target"
-                                       FontSize="13"
+                                    Spacing="6">
+                            <TextBlock Text="Behavior"
                                        Foreground="#B8C7D8" />
-                            <TextBox Text="{Binding Target, Mode=TwoWay}"
-                                     PlaceholderText="Window, region, or UI state" />
+                            <ComboBox ItemsSource="{Binding $parent[UserControl].DataContext.AvailableBehaviors}"
+                                      SelectedValue="{Binding BehaviorId, Mode=TwoWay}"
+                                      SelectedValueBinding="{Binding Id}">
+                                <ComboBox.ItemTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Text="{Binding Name}" />
+                                    </DataTemplate>
+                                </ComboBox.ItemTemplate>
+                            </ComboBox>
                         </StackPanel>
 
-                        <Grid Grid.Row="2"
-                              ColumnDefinitions="*,*"
-                              ColumnSpacing="14">
-                            <StackPanel Spacing="7">
-                                <TextBlock Text="Trigger"
-                                           FontSize="13"
-                                           Foreground="#B8C7D8" />
-                                <ComboBox ItemsSource="{Binding $parent[UserControl].DataContext.TriggerOptions}"
-                                          SelectedItem="{Binding Trigger, Mode=TwoWay}" />
-                            </StackPanel>
-
-                            <StackPanel Grid.Column="1"
-                                        Spacing="7">
-                                <TextBlock Text="Action"
-                                           FontSize="13"
-                                           Foreground="#B8C7D8" />
-                                <ComboBox ItemsSource="{Binding $parent[UserControl].DataContext.ActionOptions}"
-                                          SelectedItem="{Binding Action, Mode=TwoWay}" />
-                            </StackPanel>
-                        </Grid>
+                        <StackPanel Grid.Row="2"
+                                    Spacing="6"
+                                    IsVisible="{Binding RequiresTemplate}">
+                            <TextBlock Text="Template path"
+                                       Foreground="#B8C7D8" />
+                            <TextBox Text="{Binding TemplatePath, Mode=TwoWay}"
+                                     PlaceholderText="C:\path\template.png" />
+                        </StackPanel>
 
                         <StackPanel Grid.Row="3"
                                     Spacing="8">
-                            <Grid ColumnDefinitions="*,Auto">
-                                <TextBlock Text="Confidence threshold"
-                                           FontSize="13"
+                            <StackPanel Spacing="8"
+                                        IsVisible="{Binding RequiresTemplate}">
+                                <Grid ColumnDefinitions="*,Auto">
+                                    <TextBlock Text="Threshold"
+                                               Foreground="#B8C7D8" />
+                                    <TextBlock Grid.Column="1"
+                                               Text="{Binding Threshold, StringFormat={}{0:0.00}}"
+                                               Foreground="#B8C7D8" />
+                                </Grid>
+                                <Slider Minimum="0.5"
+                                        Maximum="0.99"
+                                        TickFrequency="0.01"
+                                        Value="{Binding Threshold, Mode=TwoWay}" />
+                            </StackPanel>
+                            <StackPanel Spacing="6"
+                                        IsVisible="{Binding IsWaitForTemplate}">
+                                <TextBlock Text="Wait timeout seconds"
                                            Foreground="#B8C7D8" />
-                                <TextBlock Grid.Column="1"
-                                           Text="{Binding Confidence, StringFormat={}{0:P0}}"
+                                <TextBox Text="{Binding TimeoutSeconds, Mode=TwoWay}"
+                                         PlaceholderText="10" />
+                            </StackPanel>
+                            <StackPanel Spacing="6"
+                                        IsVisible="{Binding IsPressKey}">
+                                <TextBlock Text="Key"
                                            Foreground="#B8C7D8" />
+                                <ComboBox ItemsSource="{Binding $parent[UserControl].DataContext.AvailableKeys}"
+                                          SelectedItem="{Binding Key, Mode=TwoWay}" />
+                            </StackPanel>
+                            <StackPanel Spacing="6"
+                                        IsVisible="{Binding IsDelay}">
+                                <TextBlock Text="Delay milliseconds"
+                                           Foreground="#B8C7D8" />
+                                <TextBox Text="{Binding DelayMilliseconds, Mode=TwoWay}"
+                                         PlaceholderText="500" />
+                            </StackPanel>
+                            <Grid ColumnDefinitions="*,*"
+                                  ColumnSpacing="12">
+                                <StackPanel Spacing="6">
+                                    <TextBlock Text="Failure policy"
+                                               Foreground="#B8C7D8" />
+                                    <ComboBox ItemsSource="{Binding $parent[UserControl].DataContext.FailurePolicies}"
+                                              SelectedItem="{Binding FailurePolicy, Mode=TwoWay}" />
+                                </StackPanel>
+                                <StackPanel Grid.Column="1"
+                                            Spacing="6">
+                                    <TextBlock Text="Retry count"
+                                               Foreground="#B8C7D8" />
+                                    <TextBox Text="{Binding MaxRetryCount, Mode=TwoWay}"
+                                             PlaceholderText="Used by Retry" />
+                                </StackPanel>
                             </Grid>
-                            <Slider Minimum="0.5"
-                                    Maximum="0.99"
-                                    TickFrequency="0.01"
-                                    Value="{Binding Confidence, Mode=TwoWay}" />
                         </StackPanel>
 
-                        <ToggleSwitch Grid.Row="4"
-                                      Content="Enabled"
-                                      IsChecked="{Binding IsEnabled, Mode=TwoWay}" />
+                        <StackPanel Grid.Row="4"
+                                    Spacing="8"
+                                    IsVisible="{Binding RequiresTemplate}">
+                            <CheckBox Content="Use Region"
+                                      IsChecked="{Binding UseRegion, Mode=TwoWay}" />
+                            <Grid ColumnDefinitions="*,*"
+                                  RowDefinitions="Auto,Auto"
+                                  ColumnSpacing="8"
+                                  RowSpacing="8">
+                                <TextBox Text="{Binding RegionX, Mode=TwoWay}"
+                                         PlaceholderText="X" />
+                                <TextBox Grid.Column="1"
+                                         Text="{Binding RegionY, Mode=TwoWay}"
+                                         PlaceholderText="Y" />
+                                <TextBox Grid.Row="1"
+                                         Text="{Binding RegionWidth, Mode=TwoWay}"
+                                         PlaceholderText="Width" />
+                                <TextBox Grid.Row="1"
+                                         Grid.Column="1"
+                                         Text="{Binding RegionHeight, Mode=TwoWay}"
+                                         PlaceholderText="Height" />
+                            </Grid>
+                        </StackPanel>
                     </Grid>
+                    </ScrollViewer>
                 </Grid>
             </Border>
         </Grid>
+
+        <Border Grid.Row="3"
+                Padding="12"
+                BorderBrush="#24FFFFFF"
+                BorderThickness="1"
+                Background="#14000000"
+                CornerRadius="8">
+            <Grid ColumnDefinitions="*,300"
+                  ColumnSpacing="16">
+                <ScrollViewer VerticalScrollBarVisibility="Auto">
+                    <ItemsControl ItemsSource="{Binding Logs}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding}"
+                                           FontSize="12"
+                                           Foreground="#B8C7D8" />
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </ScrollViewer>
+
+                <StackPanel Grid.Column="1"
+                            Spacing="6">
+                    <TextBlock Text="Run History"
+                               FontWeight="SemiBold"
+                               Foreground="#F8FBFF" />
+                    <ScrollViewer VerticalScrollBarVisibility="Auto">
+                        <ItemsControl ItemsSource="{Binding RunHistory}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding DisplayText}"
+                                               FontSize="12"
+                                               TextWrapping="Wrap"
+                                               Foreground="#B8C7D8" />
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </ScrollViewer>
+                </StackPanel>
+            </Grid>
+        </Border>
     </Grid>
 </UserControl>

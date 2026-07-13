@@ -27,10 +27,33 @@ public class ClickTemplateBehavior : IAutomationBehavior<ClickTemplateBehaviorPa
 
     #region IAutomationBehavior Members
 
+    public string Id => "click-template";
+
     public string Name => "Click Template";
 
     public string Description
         => "Capture selected window client area, match template, then click the best match center.";
+
+    public Type ParameterType => typeof(ClickTemplateBehaviorParameters);
+
+    public Task<BehaviorExecutionResult> ExecuteAsync
+    (
+            BehaviorExecutionContext context,
+            object parameters,
+            CancellationToken cancellationToken = default)
+    {
+        if(parameters is not ClickTemplateBehaviorParameters typedParameters)
+        {
+            return Task.FromResult
+                (new BehaviorExecutionResult
+                {
+                        IsSuccess = false,
+                        Message = $"Invalid parameters for behavior: {Name}."
+                });
+        }
+
+        return ExecuteAsync(context, typedParameters, cancellationToken);
+    }
 
 
     public async Task<BehaviorExecutionResult> ExecuteAsync

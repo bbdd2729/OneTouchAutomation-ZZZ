@@ -2,6 +2,7 @@ using Avalonia.Controls.ApplicationLifetimes;
 using CommunityToolkit.Mvvm.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection;
 using OneTouchAutomation.Services.Automation.Behavior;
+using OneTouchAutomation.Services.Automation.Tasks;
 using OneTouchAutomation.ViewModels;
 using OneTouchAutomation.Views;
 
@@ -68,11 +69,34 @@ public class App : Application
                 (scan => scan.FromAssemblyOf<App>().AddClasses
                                       (classes => classes.InNamespaces
                                                (
-                                                "OneTouchAutomation.Services.Capture",
-                                                "OneTouchAutomation.Services.Vision",
+                        "OneTouchAutomation.Services.Capture",
+                        "OneTouchAutomation.Services.Automation.History",
+                        "OneTouchAutomation.Services.Automation.Persistence",
+                        "OneTouchAutomation.Services.Vision",
                                                 "OneTouchAutomation.Services.Debug",
                                                 "OneTouchAutomation.Services.Input")).AsImplementedInterfaces().
                               WithSingletonLifetime());
-        services.AddSingleton<IAutomationBehavior<ClickTemplateBehaviorParameters>, ClickTemplateBehavior>();
+        services.AddSingleton<ClickTemplateBehavior>();
+        services.AddSingleton<IAutomationBehavior<ClickTemplateBehaviorParameters>>
+            (provider => provider.GetRequiredService<ClickTemplateBehavior>());
+        services.AddSingleton<IAutomationBehavior>
+            (provider => provider.GetRequiredService<ClickTemplateBehavior>());
+        services.AddSingleton<WaitForTemplateBehavior>();
+        services.AddSingleton<IAutomationBehavior<WaitForTemplateBehaviorParameters>>
+            (provider => provider.GetRequiredService<WaitForTemplateBehavior>());
+        services.AddSingleton<IAutomationBehavior>
+            (provider => provider.GetRequiredService<WaitForTemplateBehavior>());
+        services.AddSingleton<PressKeyBehavior>();
+        services.AddSingleton<IAutomationBehavior<PressKeyBehaviorParameters>>
+            (provider => provider.GetRequiredService<PressKeyBehavior>());
+        services.AddSingleton<IAutomationBehavior>
+            (provider => provider.GetRequiredService<PressKeyBehavior>());
+        services.AddSingleton<DelayBehavior>();
+        services.AddSingleton<IAutomationBehavior<DelayBehaviorParameters>>
+            (provider => provider.GetRequiredService<DelayBehavior>());
+        services.AddSingleton<IAutomationBehavior>
+            (provider => provider.GetRequiredService<DelayBehavior>());
+        services.AddSingleton<IBehaviorRegistry, BehaviorRegistry>();
+        services.AddSingleton<ITaskRunner, TaskRunner>();
     }
 }

@@ -19,6 +19,11 @@ public interface IInputService
         int screenY,
         CancellationToken cancellationToken = default);
 
+    Task PressKeyAsync
+    (
+        AutomationKey key,
+        CancellationToken cancellationToken = default);
+
     Task ClickMatchCenterAsync
     (
         CapturedFrame frame,

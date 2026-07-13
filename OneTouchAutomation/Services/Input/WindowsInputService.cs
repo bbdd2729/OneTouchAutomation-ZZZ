@@ -10,6 +10,7 @@ public sealed class WindowsInputService : IInputService
 {
     private const uint MouseEventLeftDown = 0x0002;
     private const uint MouseEventLeftUp   = 0x0004;
+    private const uint KeyEventKeyUp = 0x0002;
 
     public Task MoveMouseAsync
     (
@@ -69,6 +70,23 @@ public sealed class WindowsInputService : IInputService
         return ClickAsync(screenX, screenY, cancellationToken);
     }
 
+    public async Task PressKeyAsync
+    (
+        AutomationKey key,
+        CancellationToken cancellationToken = default)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+
+        if(!Enum.IsDefined(key))
+        {
+            throw new ArgumentOutOfRangeException(nameof(key));
+        }
+
+        keybd_event((byte)key, 0, 0, UIntPtr.Zero);
+        await Task.Delay(60, cancellationToken);
+        keybd_event((byte)key, 0, KeyEventKeyUp, UIntPtr.Zero);
+    }
+
     [DllImport("user32.dll")]
     private static extern bool SetCursorPos(int x, int y);
 
@@ -79,5 +97,13 @@ public sealed class WindowsInputService : IInputService
         uint dx,
         uint dy,
         uint dwData,
+             UIntPtr dwExtraInfo);
+
+    [DllImport("user32.dll")]
+    private static extern void keybd_event
+    (
+        byte bVk,
+        byte bScan,
+        uint dwFlags,
         UIntPtr dwExtraInfo);
 }
