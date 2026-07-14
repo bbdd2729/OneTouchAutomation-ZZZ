@@ -1,5 +1,6 @@
-using System.Collections.ObjectModel;
+using Avalonia.Styling;
 using Avalonia.Media;
+using AvaloniaFluentUI.Styling;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 
@@ -7,45 +8,114 @@ namespace OneTouchAutomation.ViewModels;
 
 public partial class SettingsPageViewModel : ViewModelBase
 {
+    private bool _isUpdatingAccentSelection;
+
     public SettingsPageViewModel(AppAppearanceSettings appearance)
     {
         Appearance = appearance;
-        ThemeColors = new ObservableCollection<AcrylicThemeColorOption>
-        {
-            new("Ocean", Color.Parse("#24364F"), Color.Parse("#202A3A")),
-            new("Graphite", Color.Parse("#2D3038"), Color.Parse("#24272E")),
-            new("Teal", Color.Parse("#1F4944"), Color.Parse("#1B3936")),
-            new("Violet", Color.Parse("#44365F"), Color.Parse("#342A49")),
-            new("Obsidian", Color.Parse("#4B342C"), Color.Parse("#362923")),
-        };
-
-        SelectedThemeColor = ThemeColors[0];
+        Appearance.PropertyChanged += OnAppearancePropertyChanged;
+        AvaloniaFluentTheme.Instance.ThemeChanged += OnThemeChanged;
     }
 
     public SettingsPageViewModel() : this(new AppAppearanceSettings()) { }
 
     public AppAppearanceSettings Appearance { get; }
 
-    public ObservableCollection<AcrylicThemeColorOption> ThemeColors { get; }
+    public bool IsNoWindowMaterial => Appearance.WindowMaterialMode == WindowMaterialMode.None;
+
+    public bool IsMicaWindowMaterial => Appearance.WindowMaterialMode == WindowMaterialMode.Mica;
+
+    public bool IsAcrylicWindowMaterial => Appearance.WindowMaterialMode == WindowMaterialMode.Acrylic;
+
+    public bool IsWindows11 => OperatingSystem.IsWindowsVersionAtLeast(10, 0, 22000);
+
+    public bool IsSystemTheme => AvaloniaFluentTheme.Instance.CurrentTheme == ThemeVariant.Default;
+
+    public bool IsLightTheme => AvaloniaFluentTheme.Instance.CurrentTheme == ThemeVariant.Light;
+
+    public bool IsDarkTheme => AvaloniaFluentTheme.Instance.CurrentTheme == ThemeVariant.Dark;
 
     [ObservableProperty]
-    private AcrylicThemeColorOption? _selectedThemeColor;
+    private bool _isDefaultAccentColor = true;
 
-    partial void OnSelectedThemeColorChanged(AcrylicThemeColorOption? value)
+    [ObservableProperty]
+    private bool _isCustomAccentColor;
+
+    [ObservableProperty]
+    private Color _selectedAccentColor = Color.Parse("#0078D4");
+
+    private void OnAppearancePropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
     {
-        if (value is null) return;
+        if (e.PropertyName == nameof(AppAppearanceSettings.WindowMaterialMode))
+        {
+            OnPropertyChanged(nameof(IsNoWindowMaterial));
+            OnPropertyChanged(nameof(IsMicaWindowMaterial));
+            OnPropertyChanged(nameof(IsAcrylicWindowMaterial));
+        }
+    }
 
-        Appearance.AcrylicTintColor = value.TintColor;
-        Appearance.AcrylicFallbackColor = value.FallbackColor;
+    private void OnThemeChanged(object? sender, ThemeVariant? e)
+    {
+        OnPropertyChanged(nameof(IsSystemTheme));
+        OnPropertyChanged(nameof(IsLightTheme));
+        OnPropertyChanged(nameof(IsDarkTheme));
+    }
+
+    partial void OnIsDefaultAccentColorChanged(bool value)
+    {
+        if (!value || _isUpdatingAccentSelection)
+        {
+            return;
+        }
+
+        _isUpdatingAccentSelection = true;
+        IsCustomAccentColor = false;
+        AvaloniaFluentTheme.Instance.CustomAccentColor = null;
+        _isUpdatingAccentSelection = false;
+    }
+
+    partial void OnIsCustomAccentColorChanged(bool value)
+    {
+        if (!value || _isUpdatingAccentSelection)
+        {
+            return;
+        }
+
+        _isUpdatingAccentSelection = true;
+        IsDefaultAccentColor = false;
+        AvaloniaFluentTheme.Instance.CustomAccentColor = SelectedAccentColor;
+        _isUpdatingAccentSelection = false;
+    }
+
+    partial void OnSelectedAccentColorChanged(Color value)
+    {
+        if (IsCustomAccentColor)
+        {
+            AvaloniaFluentTheme.Instance.CustomAccentColor = value;
+        }
     }
 
     [RelayCommand]
-    private void SelectThemeColor(AcrylicThemeColorOption? option)
+    private void SelectWindowMaterial(WindowMaterialMode mode)
     {
-        if (option is null) return;
+        Appearance.WindowMaterialMode = mode;
+    }
 
-        SelectedThemeColor = option;
+    [RelayCommand]
+    private void SelectTheme(AppThemeMode mode)
+    {
+        AvaloniaFluentTheme.Instance.CurrentTheme = mode switch
+        {
+            AppThemeMode.Light => ThemeVariant.Light,
+            AppThemeMode.Dark => ThemeVariant.Dark,
+            _ => ThemeVariant.Default,
+        };
     }
 }
 
-public sealed record AcrylicThemeColorOption(string Name, Color TintColor, Color FallbackColor);
+public enum AppThemeMode
+{
+    System,
+    Light,
+    Dark,
+}

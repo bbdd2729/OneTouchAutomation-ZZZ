@@ -1,19 +1,56 @@
 <Application xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:fluentUi="using:AvaloniaFluentUI.Styling"
              x:Class="OneTouchAutomation.App"
              RequestedThemeVariant="Default">
     <!-- "Default" ThemeVariant follows system theme variant. "Dark" or "Light" are other available options. -->
 
     <Application.Resources>
-       <ResourceDictionary>
-           
-           
-           
-       </ResourceDictionary>
+        <ResourceDictionary>
+            <ResourceDictionary.ThemeDictionaries>
+                <ResourceDictionary x:Key="Light">
+                    <SolidColorBrush x:Key="SystemBrush" Color="#F0F4F9" />
+                </ResourceDictionary>
+                <ResourceDictionary x:Key="Dark">
+                    <SolidColorBrush x:Key="SystemBrush" Color="#202020" />
+                </ResourceDictionary>
+            </ResourceDictionary.ThemeDictionaries>
+        </ResourceDictionary>
     </Application.Resources>
     <Application.Styles>
-        <FluentTheme />
-        
+        <fluentUi:AvaloniaFluentTheme />
+
+        <Style Selector="Border.surface">
+            <Setter Property="CornerRadius" Value="8" />
+            <Setter Property="BorderBrush" Value="{DynamicResource ControlStrokeColorDefault}" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="Background" Value="{DynamicResource ControlFillColorDefaultBrush}" />
+        </Style>
+        <Style Selector="Border.surface-subtle">
+            <Setter Property="CornerRadius" Value="8" />
+            <Setter Property="BorderBrush" Value="{DynamicResource ControlStrokeColorDefault}" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="Background" Value="{DynamicResource ControlFillColorSecondaryBrush}" />
+        </Style>
+        <Style Selector="TextBlock.page-title">
+            <Setter Property="FontSize" Value="28" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="Foreground" Value="{DynamicResource TextFillColorPrimaryBrush}" />
+        </Style>
+        <Style Selector="TextBlock.page-subtitle">
+            <Setter Property="FontSize" Value="14" />
+            <Setter Property="Foreground" Value="{DynamicResource TextFillColorSecondaryBrush}" />
+            <Setter Property="TextWrapping" Value="Wrap" />
+        </Style>
+        <Style Selector="Button.command">
+            <Setter Property="MinHeight" Value="36" />
+            <Setter Property="Padding" Value="14 7" />
+            <Setter Property="CornerRadius" Value="6" />
+        </Style>
+        <Style Selector="Button.command:pointerover">
+            <Setter Property="Background" Value="{DynamicResource ControlFillColorSecondaryBrush}" />
+        </Style>
+
         <Style Selector="TextBlock.Icon">
             <Setter Property="FontFamily" Value="Segoe Fluent Icons" />
             <Setter Property="Text" Value="{DynamicResource IconBrush}" />
