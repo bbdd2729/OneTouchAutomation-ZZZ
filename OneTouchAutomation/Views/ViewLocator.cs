@@ -18,6 +18,7 @@ public class ViewLocator : IDataTemplate
         RegisterViewFactory<SettingsPageViewModel, SettingsPage>();
         RegisterViewFactory<InfoPageViewModel, InfoPage>();
         RegisterViewFactory<GamePageViewModel, GamePage>();
+        RegisterViewFactory<WorkflowPageViewModel, WorkflowPage>();
         RegisterViewFactory<DebugPageViewModel, DebugPage>();
     }
 

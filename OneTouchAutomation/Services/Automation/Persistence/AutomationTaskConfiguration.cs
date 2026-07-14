@@ -47,5 +47,11 @@ public sealed class AutomationTaskConfiguration
 
     public int ClickHoldDurationMilliseconds { get; init; } = 60;
 
+    public string WorkflowId { get; init; } = string.Empty;
+
+    public int GameRefreshHour { get; init; } = 4;
+
+    public bool ForceDailyRun { get; init; }
+
     public bool IsEnabled { get; init; } = true;
 }

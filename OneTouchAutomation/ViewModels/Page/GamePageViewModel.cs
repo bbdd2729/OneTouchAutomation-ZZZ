@@ -11,6 +11,7 @@ using OneTouchAutomation.Services.Automation.Behavior;
 using OneTouchAutomation.Services.Automation.History;
 using OneTouchAutomation.Services.Automation.Persistence;
 using OneTouchAutomation.Services.Automation.Tasks;
+using OneTouchAutomation.Services.Automation.Workflows;
 using OneTouchAutomation.Services.Capture;
 using OneTouchAutomation.Services.Input;
 
@@ -24,19 +25,22 @@ public partial class GamePageViewModel : ViewModelBase
     private readonly ITaskRunHistoryStore _taskRunHistoryStore;
     private readonly ITaskRunner _taskRunner;
     private readonly IBehaviorRegistry _behaviorRegistry;
+    private readonly IWorkflowConfigurationStore _workflowConfigurationStore;
 
     public GamePageViewModel(
         IScreenCaptureService screenCaptureService,
         ITaskRunner taskRunner,
         ITaskConfigurationStore taskConfigurationStore,
         ITaskRunHistoryStore taskRunHistoryStore,
-        IBehaviorRegistry behaviorRegistry)
+        IBehaviorRegistry behaviorRegistry,
+        IWorkflowConfigurationStore workflowConfigurationStore)
     {
         _screenCaptureService = screenCaptureService;
         _taskRunner = taskRunner;
         _taskConfigurationStore = taskConfigurationStore;
         _taskRunHistoryStore = taskRunHistoryStore;
         _behaviorRegistry = behaviorRegistry;
+        _workflowConfigurationStore = workflowConfigurationStore;
 
         foreach(var behavior in _behaviorRegistry.Behaviors.Where(IsSupportedTaskBehavior))
         {
@@ -47,6 +51,7 @@ public partial class GamePageViewModel : ViewModelBase
         {
             _ = LoadTasksAsync();
             _ = LoadRunHistoryAsync();
+            _ = LoadWorkflowsAsync();
         }
     }
 
@@ -55,13 +60,18 @@ public partial class GamePageViewModel : ViewModelBase
         null!,
         new JsonTaskConfigurationStore(),
         new JsonTaskRunHistoryStore(),
-        new BehaviorRegistry([])) { }
+        new BehaviorRegistry([]),
+        new JsonWorkflowConfigurationStore(
+            new BehaviorRegistry([]),
+            new WorkflowValidator(new BehaviorRegistry([])))) { }
 
     public ObservableCollection<AutomationTaskModel> Tasks { get; } = new();
 
     public ObservableCollection<CaptureWindowInfo> Windows { get; } = new();
 
     public ObservableCollection<IAutomationBehavior> AvailableBehaviors { get; } = new();
+
+    public ObservableCollection<WorkflowDefinition> AvailableWorkflows { get; } = new();
 
     public IReadOnlyList<TaskFailurePolicy> FailurePolicies { get; } = Enum.GetValues<TaskFailurePolicy>();
 
@@ -181,6 +191,28 @@ public partial class GamePageViewModel : ViewModelBase
         catch(Exception exception)
         {
             AddLog($"Failed to load run history: {exception.Message}");
+        }
+    }
+
+    [RelayCommand]
+    private async Task LoadWorkflowsAsync()
+    {
+        try
+        {
+            var workflows = await _workflowConfigurationStore.LoadAsync();
+
+            AvailableWorkflows.Clear();
+
+            foreach(var workflow in workflows)
+            {
+                AvailableWorkflows.Add(workflow);
+            }
+
+            AddLog($"Loaded {AvailableWorkflows.Count} workflow(s).");
+        }
+        catch(Exception exception)
+        {
+            AddLog($"Failed to load workflows: {exception.Message}");
         }
     }
 
@@ -407,6 +439,16 @@ public partial class GamePageViewModel : ViewModelBase
             {
                 DurationMilliseconds = task.DelayMilliseconds
             },
+            "run-workflow" => new RunWorkflowBehaviorParameters
+            {
+                WorkflowId = task.WorkflowId
+            },
+            "run-daily-workflow" => new RunDailyWorkflowBehaviorParameters
+            {
+                WorkflowId = task.WorkflowId,
+                GameRefreshHour = task.GameRefreshHour,
+                ForceRun = task.ForceDailyRun
+            },
             _ => throw new InvalidOperationException($"Unsupported task behavior: {task.BehaviorId}")
         };
 
@@ -488,6 +530,9 @@ public partial class GamePageViewModel : ViewModelBase
             ClickRepeatCount = task.ClickRepeatCount,
             ClickIntervalMilliseconds = task.ClickIntervalMilliseconds,
             ClickHoldDurationMilliseconds = task.ClickHoldDurationMilliseconds,
+            WorkflowId = task.WorkflowId,
+            GameRefreshHour = task.GameRefreshHour,
+            ForceDailyRun = task.ForceDailyRun,
             IsEnabled = task.IsEnabled
         };
     }
@@ -517,6 +562,9 @@ public partial class GamePageViewModel : ViewModelBase
             ClickRepeatCount = configuration.ClickRepeatCount,
             ClickIntervalMilliseconds = configuration.ClickIntervalMilliseconds,
             ClickHoldDurationMilliseconds = configuration.ClickHoldDurationMilliseconds,
+            WorkflowId = configuration.WorkflowId,
+            GameRefreshHour = configuration.GameRefreshHour,
+            ForceDailyRun = configuration.ForceDailyRun,
             IsEnabled = configuration.IsEnabled
         };
     }
@@ -545,6 +593,9 @@ public partial class GamePageViewModel : ViewModelBase
             ClickRepeatCount = source.ClickRepeatCount,
             ClickIntervalMilliseconds = source.ClickIntervalMilliseconds,
             ClickHoldDurationMilliseconds = source.ClickHoldDurationMilliseconds,
+            WorkflowId = source.WorkflowId,
+            GameRefreshHour = source.GameRefreshHour,
+            ForceDailyRun = source.ForceDailyRun,
             IsEnabled = source.IsEnabled
         };
     }
@@ -567,6 +618,6 @@ public partial class GamePageViewModel : ViewModelBase
 
     private static bool IsSupportedTaskBehavior(IAutomationBehavior behavior)
     {
-        return behavior.Id is "click-template" or "wait-for-template" or "press-key" or "delay";
+        return behavior.Id is "click-template" or "wait-for-template" or "press-key" or "delay" or "run-workflow" or "run-daily-workflow";
     }
 }

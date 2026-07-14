@@ -39,7 +39,7 @@
         </Grid>
 
         <Grid Grid.Row="1"
-              ColumnDefinitions="Auto,260,Auto,Auto,Auto,Auto,*"
+              ColumnDefinitions="Auto,260,Auto,Auto,Auto,Auto,Auto,*"
               ColumnSpacing="10">
             <Button Content="Refresh Windows"
                     Command="{Binding RefreshWindowsCommand}" />
@@ -70,7 +70,11 @@
                     Content="Reload Tasks"
                     Command="{Binding LoadTasksCommand}" />
 
-            <TextBlock Grid.Column="6"
+            <Button Grid.Column="6"
+                    Content="Reload Workflows"
+                    Command="{Binding LoadWorkflowsCommand}" />
+
+            <TextBlock Grid.Column="7"
                        Text="{Binding RunStatus}"
                        VerticalAlignment="Center"
                        HorizontalAlignment="Right"
@@ -243,6 +247,29 @@
                                            Foreground="#B8C7D8" />
                                 <TextBox Text="{Binding DelayMilliseconds, Mode=TwoWay}"
                                          PlaceholderText="500" />
+                            </StackPanel>
+                            <StackPanel Spacing="6"
+                                        IsVisible="{Binding IsWorkflowSelection}">
+                                <TextBlock Text="Workflow"
+                                           Foreground="#B8C7D8" />
+                                <ComboBox ItemsSource="{Binding $parent[UserControl].DataContext.AvailableWorkflows}"
+                                          SelectedValue="{Binding WorkflowId, Mode=TwoWay}"
+                                          SelectedValueBinding="{Binding Id}">
+                                    <ComboBox.ItemTemplate>
+                                        <DataTemplate>
+                                            <TextBlock Text="{Binding Name}" />
+                                        </DataTemplate>
+                                    </ComboBox.ItemTemplate>
+                                </ComboBox>
+                            </StackPanel>
+                            <StackPanel Spacing="8"
+                                        IsVisible="{Binding IsDailyWorkflow}">
+                                <TextBlock Text="Game refresh hour"
+                                           Foreground="#B8C7D8" />
+                                <TextBox Text="{Binding GameRefreshHour, Mode=TwoWay}"
+                                         PlaceholderText="4" />
+                                <CheckBox Content="Force run even if already completed today"
+                                          IsChecked="{Binding ForceDailyRun, Mode=TwoWay}" />
                             </StackPanel>
                             <StackPanel Spacing="8"
                                         IsVisible="{Binding IsClickTemplate}">

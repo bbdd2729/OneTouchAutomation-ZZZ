@@ -28,4 +28,6 @@ public sealed class ClickTemplateBehaviorParameters
     public int ClickIntervalMilliseconds { get; init; } = 100;
 
     public int ClickHoldDurationMilliseconds { get; init; } = 60;
+
+    public bool FailWhenNotFound { get; init; } = true;
 }

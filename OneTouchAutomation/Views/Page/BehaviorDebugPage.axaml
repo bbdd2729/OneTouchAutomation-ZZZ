@@ -12,10 +12,11 @@
     <viewModels:BehaviorDebugViewModel />
   </Design.DataContext>
 
-  <Grid RowDefinitions="Auto,*,120"
+  <Grid RowDefinitions="Auto,*,150"
         RowSpacing="14">
-    <StackPanel Orientation="Horizontal"
-                Spacing="10">
+    <WrapPanel ItemHeight="36"
+               ItemWidth="220"
+               Orientation="Horizontal">
       <ComboBox Width="220"
                 ItemsSource="{Binding Behaviors}"
                 SelectedItem="{Binding SelectedBehavior, Mode=TwoWay}">
@@ -41,7 +42,10 @@
 
       <Button Content="Run Selected Behavior"
               Command="{Binding RunSelectedBehaviorCommand}" />
-    </StackPanel>
+
+      <Button Content="Wait Then Click"
+              Command="{Binding RunTemplateClickWorkflowCommand}" />
+    </WrapPanel>
 
     <Grid Grid.Row="1"
           ColumnDefinitions="360,*"
@@ -51,7 +55,9 @@
               BorderBrush="#24FFFFFF"
               BorderThickness="1"
               Background="#1CFFFFFF">
-        <StackPanel Spacing="14">
+        <ScrollViewer HorizontalScrollBarVisibility="Disabled"
+                      VerticalScrollBarVisibility="Auto">
+          <StackPanel Spacing="14">
           <TextBlock Text="{Binding SelectedBehavior.Name}"
                      FontWeight="SemiBold" />
 
@@ -156,7 +162,8 @@
                        PlaceholderText="Height" />
             </Grid>
           </StackPanel>
-        </StackPanel>
+          </StackPanel>
+        </ScrollViewer>
       </Border>
 
       <Border Grid.Column="1"
@@ -165,12 +172,32 @@
               BorderBrush="#24FFFFFF"
               BorderThickness="1"
               Background="#14000000">
-        <StackPanel Spacing="8">
+        <StackPanel Spacing="14">
           <TextBlock Text="Result"
                      FontWeight="SemiBold" />
           <TextBlock Text="{Binding ResultText}"
                      TextWrapping="Wrap"
                      Foreground="#B8C7D8" />
+          <Separator />
+          <TextBlock Text="Saved workflow test"
+                     FontWeight="SemiBold" />
+          <Button Content="Load Saved Workflows"
+                  Command="{Binding LoadWorkflowsCommand}" />
+          <ComboBox ItemsSource="{Binding Workflows}"
+                    SelectedItem="{Binding SelectedWorkflow, Mode=TwoWay}">
+            <ComboBox.ItemTemplate>
+              <DataTemplate>
+                <StackPanel Spacing="2">
+                  <TextBlock Text="{Binding Name}" />
+                  <TextBlock Text="{Binding Nodes.Count, StringFormat={}{0} node(s)}"
+                             FontSize="12"
+                             Foreground="#B8C7D8" />
+                </StackPanel>
+              </DataTemplate>
+            </ComboBox.ItemTemplate>
+          </ComboBox>
+          <Button Content="Run Selected Workflow"
+                  Command="{Binding RunSelectedWorkflowCommand}" />
         </StackPanel>
       </Border>
     </Grid>
@@ -181,7 +208,9 @@
             BorderBrush="#24FFFFFF"
             BorderThickness="1"
             Background="#14000000">
-      <ItemsControl ItemsSource="{Binding Logs}">
+      <ScrollViewer HorizontalScrollBarVisibility="Disabled"
+                    VerticalScrollBarVisibility="Auto">
+        <ItemsControl ItemsSource="{Binding Logs}">
         <ItemsControl.ItemTemplate>
           <DataTemplate>
             <TextBlock Text="{Binding}"
@@ -189,7 +218,8 @@
                        Foreground="#B8C7D8" />
           </DataTemplate>
         </ItemsControl.ItemTemplate>
-      </ItemsControl>
+        </ItemsControl>
+      </ScrollViewer>
     </Border>
   </Grid>
 </UserControl>

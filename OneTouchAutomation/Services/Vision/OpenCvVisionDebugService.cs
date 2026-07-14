@@ -95,10 +95,12 @@ public class OpenCvVisionDebugService : IVisionDebugService
              out Point maxLoc);
 
         var matches = new List<TemplateMatchItem>();
+        var resultRows = result.Rows;
+        var resultColumns = result.Cols;
 
-        for (int y = 0; y < result.Rows; y++)
+        for (int y = 0; y < resultRows; y++)
         {
-            for (int x = 0; x < result.Cols; x++)
+            for (int x = 0; x < resultColumns; x++)
             {
                 var matchScore = result.At<float>(y, x);
 

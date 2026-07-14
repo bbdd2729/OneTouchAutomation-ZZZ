@@ -16,6 +16,10 @@ public partial class AutomationTaskModel : ObservableObject
             ? "Press Key"
         : BehaviorId == "delay"
             ? "Delay"
+        : BehaviorId == "run-workflow"
+            ? "Run Workflow"
+        : BehaviorId == "run-daily-workflow"
+            ? "Run Daily Workflow"
         : "Click Template";
 
     public bool RequiresTemplate => BehaviorId is "click-template" or "wait-for-template";
@@ -27,6 +31,12 @@ public partial class AutomationTaskModel : ObservableObject
     public bool IsPressKey => BehaviorId == "press-key";
 
     public bool IsDelay => BehaviorId == "delay";
+
+    public bool IsRunWorkflow => BehaviorId == "run-workflow";
+
+    public bool IsDailyWorkflow => BehaviorId == "run-daily-workflow";
+
+    public bool IsWorkflowSelection => IsRunWorkflow || IsDailyWorkflow;
 
     [ObservableProperty] private string _name = "Click template";
 
@@ -66,6 +76,12 @@ public partial class AutomationTaskModel : ObservableObject
 
     [ObservableProperty] private int _clickHoldDurationMilliseconds = 60;
 
+    [ObservableProperty] private string _workflowId = string.Empty;
+
+    [ObservableProperty] private int _gameRefreshHour = 4;
+
+    [ObservableProperty] private bool _forceDailyRun;
+
     [ObservableProperty] private bool _isEnabled = true;
 
     partial void OnBehaviorIdChanged(string value)
@@ -76,5 +92,8 @@ public partial class AutomationTaskModel : ObservableObject
         OnPropertyChanged(nameof(IsWaitForTemplate));
         OnPropertyChanged(nameof(IsPressKey));
         OnPropertyChanged(nameof(IsDelay));
+        OnPropertyChanged(nameof(IsRunWorkflow));
+        OnPropertyChanged(nameof(IsDailyWorkflow));
+        OnPropertyChanged(nameof(IsWorkflowSelection));
     }
 }
