@@ -21,6 +21,7 @@ public partial class BehaviorDebugViewModel : ViewModelBase
     private readonly IBehaviorRegistry                                   _behaviorRegistry;
     private readonly IScreenCaptureService                                _screenCaptureService;
     private readonly IWorkflowRunner                                      _workflowRunner;
+    private readonly IWorkflowConfigurationStore                          _workflowStore;
 
     [ObservableProperty] private int _regionHeight = 300;
 
@@ -70,6 +71,8 @@ public partial class BehaviorDebugViewModel : ViewModelBase
 
     [ObservableProperty] private bool _useRegion;
 
+    [ObservableProperty] private WorkflowDefinition? _selectedWorkflow;
+
     public BehaviorDebugViewModel
     (
             IScreenCaptureService screenCaptureService,
@@ -78,7 +81,8 @@ public partial class BehaviorDebugViewModel : ViewModelBase
             IAutomationBehavior<PressKeyBehaviorParameters> pressKeyBehavior,
             IAutomationBehavior<DelayBehaviorParameters> delayBehavior,
             IBehaviorRegistry behaviorRegistry,
-            IWorkflowRunner workflowRunner)
+            IWorkflowRunner workflowRunner,
+            IWorkflowConfigurationStore workflowStore)
     {
         _screenCaptureService  = screenCaptureService;
         _clickTemplateBehavior = clickTemplateBehavior;
@@ -87,6 +91,7 @@ public partial class BehaviorDebugViewModel : ViewModelBase
         _delayBehavior = delayBehavior;
         _behaviorRegistry      = behaviorRegistry;
         _workflowRunner = workflowRunner;
+        _workflowStore = workflowStore;
 
         foreach(var behavior in _behaviorRegistry.Behaviors)
         {
@@ -97,13 +102,23 @@ public partial class BehaviorDebugViewModel : ViewModelBase
     }
 
     public BehaviorDebugViewModel()
-            : this(new ScreenCaptureService(), null!, null!, null!, null!, new BehaviorRegistry([]), null!) { }
+            : this(
+                new ScreenCaptureService(),
+                null!,
+                null!,
+                null!,
+                null!,
+                new BehaviorRegistry([]),
+                null!,
+                new JsonWorkflowConfigurationStore(new BehaviorRegistry([]), new WorkflowValidator(new BehaviorRegistry([])))) { }
 
     public ObservableCollection<IAutomationBehavior> Behaviors { get; } = new();
 
     public ObservableCollection<CaptureWindowInfo> Windows { get; } = new();
 
     public ObservableCollection<string> Logs { get; } = new();
+
+    public ObservableCollection<WorkflowDefinition> Workflows { get; } = new();
 
     [RelayCommand]
     private async Task RefreshWindowsAsync()
@@ -245,6 +260,57 @@ public partial class BehaviorDebugViewModel : ViewModelBase
             : result.IsSuccess
                 ? $"Workflow completed: {result.StepResults.Count} step(s)."
                 : $"Workflow failed after {result.StepResults.Count} step(s).";
+
+        Logs.Insert(0, ResultText);
+    }
+
+    [RelayCommand]
+    private async Task LoadWorkflowsAsync()
+    {
+        try
+        {
+            var workflows = await _workflowStore.LoadAsync();
+            Workflows.Clear();
+
+            foreach(var workflow in workflows)
+            {
+                Workflows.Add(workflow);
+            }
+
+            SelectedWorkflow = Workflows.FirstOrDefault();
+            Logs.Insert(0, $"Loaded {Workflows.Count} saved workflow(s).");
+        }
+        catch(Exception exception)
+        {
+            Logs.Insert(0, $"Failed to load workflows: {exception.Message}");
+        }
+    }
+
+    [RelayCommand]
+    private async Task RunSelectedWorkflowAsync()
+    {
+        if(SelectedWindow is null)
+        {
+            Logs.Insert(0, "Select a window first.");
+            return;
+        }
+
+        if(SelectedWorkflow is null)
+        {
+            Logs.Insert(0, "Load and select a saved workflow first.");
+            return;
+        }
+
+        var result = await _workflowRunner.RunAsync(
+            SelectedWindow.Handle,
+            SelectedWorkflow,
+            message => Logs.Insert(0, message));
+
+        ResultText = result.IsCancelled
+            ? $"Workflow cancelled: {SelectedWorkflow.Name}."
+            : result.IsSuccess
+                ? $"Workflow completed: {SelectedWorkflow.Name}, {result.StepResults.Count} node(s)."
+                : $"Workflow failed: {SelectedWorkflow.Name}, {result.StepResults.Count} node(s).";
 
         Logs.Insert(0, ResultText);
     }
