@@ -4,6 +4,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:models="clr-namespace:OneTouchAutomation.Models"
              xmlns:vm="clr-namespace:OneTouchAutomation.ViewModels"
+             xmlns:fui="clr-namespace:AvaloniaFluentUI.Controls;assembly=AvaloniaFluentUI"
              mc:Ignorable="d"
              d:DesignWidth="1000"
              d:DesignHeight="650"
@@ -14,44 +15,57 @@
     </Design.DataContext>
 
     <Grid Margin="32" RowDefinitions="Auto,*,Auto" RowSpacing="18">
-        <Grid ColumnDefinitions="*,Auto,Auto,Auto,Auto,Auto" ColumnSpacing="10">
+        <Grid ColumnDefinitions="*,Auto" ColumnSpacing="16">
             <StackPanel Spacing="5">
-                <TextBlock Text="Workflows" FontSize="28" FontWeight="SemiBold" Foreground="#F8FBFF" />
-                <TextBlock Text="Manage reusable automation graphs." Foreground="#B8C7D8" />
+                <TextBlock Text="Workflows" FontSize="28" FontWeight="SemiBold" Foreground="{DynamicResource TextFillColorPrimaryBrush}" />
+                <TextBlock Text="Manage reusable automation graphs." Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
             </StackPanel>
-            <Button Grid.Column="1" Content="Reload" Command="{Binding LoadCommand}" />
-            <Button Grid.Column="2" Content="New" Command="{Binding NewWorkflowCommand}" />
-            <Button Grid.Column="3" Content="Delete" Command="{Binding DeleteWorkflowCommand}" />
-            <Button Grid.Column="4" Content="Validate" Command="{Binding ValidateWorkflowCommand}" />
-            <Button Grid.Column="5" Content="Save" Command="{Binding SaveCommand}" />
+            <fui:CommandBar Grid.Column="1"
+                            DefaultLabelPosition="Right">
+                <fui:CommandBar.PrimaryCommands>
+                    <fui:CommandBarButton IconSource="Refresh" Label="Reload" Command="{Binding LoadCommand}" />
+                    <fui:CommandBarButton IconSource="Add" Label="New" Command="{Binding NewWorkflowCommand}" />
+                    <fui:CommandBarButton IconSource="CheckMark" Label="Validate" Command="{Binding ValidateWorkflowCommand}" />
+                    <fui:CommandBarButton IconSource="Save" Label="Save" Command="{Binding SaveCommand}" />
+                </fui:CommandBar.PrimaryCommands>
+                <fui:CommandBar.SecondaryCommands>
+                    <fui:CommandBarButton IconSource="Delete" Label="Delete" Command="{Binding DeleteWorkflowCommand}" />
+                </fui:CommandBar.SecondaryCommands>
+            </fui:CommandBar>
         </Grid>
 
         <Grid Grid.Row="1" ColumnDefinitions="280,*,330" ColumnSpacing="18">
-            <Border BorderBrush="#24FFFFFF" BorderThickness="1" Background="#1CFFFFFF" CornerRadius="8">
+            <Border BorderBrush="{DynamicResource ControlStrokeColorDefault}" BorderThickness="1" Background="{DynamicResource ControlFillColorDefaultBrush}" CornerRadius="8">
                 <ListBox Margin="10" ItemsSource="{Binding Workflows}" SelectedItem="{Binding SelectedWorkflow, Mode=TwoWay}">
                     <ListBox.ItemTemplate>
                         <DataTemplate DataType="models:WorkflowEditorModel">
                             <StackPanel Margin="10" Spacing="4">
-                                <TextBlock Text="{Binding Name}" FontWeight="SemiBold" Foreground="#F8FBFF" />
-                                <TextBlock Text="{Binding Nodes.Count}" FontSize="12" Foreground="#B8C7D8" />
+                                <TextBlock Text="{Binding Name}" FontWeight="SemiBold" Foreground="{DynamicResource TextFillColorPrimaryBrush}" />
+                                <TextBlock Text="{Binding Nodes.Count}" FontSize="12" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
                             </StackPanel>
                         </DataTemplate>
                     </ListBox.ItemTemplate>
                 </ListBox>
             </Border>
 
-            <Border Grid.Column="1" Padding="20" BorderBrush="#24FFFFFF" BorderThickness="1" Background="#1CFFFFFF" CornerRadius="8">
+            <Border Grid.Column="1" Padding="20" BorderBrush="{DynamicResource ControlStrokeColorDefault}" BorderThickness="1" Background="{DynamicResource ControlFillColorDefaultBrush}" CornerRadius="8">
                 <Grid DataContext="{Binding SelectedWorkflow}" RowDefinitions="Auto,Auto,*" RowSpacing="14">
                     <StackPanel Spacing="6">
-                        <TextBlock Text="Workflow name" Foreground="#B8C7D8" />
+                        <TextBlock Text="Workflow name" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
                         <TextBox Text="{Binding Name, Mode=TwoWay}" PlaceholderText="Workflow name" />
                     </StackPanel>
-                    <Grid Grid.Row="1" ColumnDefinitions="*,Auto,Auto,Auto,Auto" ColumnSpacing="8">
-                        <TextBlock Text="Nodes" FontWeight="SemiBold" Foreground="#F8FBFF" VerticalAlignment="Center" />
-                        <Button Grid.Column="1" Content="Add Delay" Command="{Binding $parent[UserControl].DataContext.AddNodeCommand}" />
-                        <Button Grid.Column="2" Content="Up" Command="{Binding $parent[UserControl].DataContext.MoveNodeUpCommand}" />
-                        <Button Grid.Column="3" Content="Down" Command="{Binding $parent[UserControl].DataContext.MoveNodeDownCommand}" />
-                        <Button Grid.Column="4" Content="Remove" Command="{Binding $parent[UserControl].DataContext.RemoveNodeCommand}" />
+                    <Grid Grid.Row="1" ColumnDefinitions="*,Auto" ColumnSpacing="8">
+                        <TextBlock Text="Nodes" FontWeight="SemiBold" Foreground="{DynamicResource TextFillColorPrimaryBrush}" VerticalAlignment="Center" />
+                        <fui:CommandBar Grid.Column="1" DefaultLabelPosition="Right">
+                            <fui:CommandBar.PrimaryCommands>
+                                <fui:CommandBarButton IconSource="Add" Label="Add Delay" Command="{Binding $parent[UserControl].DataContext.AddNodeCommand}" />
+                            </fui:CommandBar.PrimaryCommands>
+                            <fui:CommandBar.SecondaryCommands>
+                                <fui:CommandBarButton Label="Move Up" Command="{Binding $parent[UserControl].DataContext.MoveNodeUpCommand}" />
+                                <fui:CommandBarButton Label="Move Down" Command="{Binding $parent[UserControl].DataContext.MoveNodeDownCommand}" />
+                                <fui:CommandBarButton IconSource="Delete" Label="Remove" Command="{Binding $parent[UserControl].DataContext.RemoveNodeCommand}" />
+                            </fui:CommandBar.SecondaryCommands>
+                        </fui:CommandBar>
                     </Grid>
                     <ListBox Grid.Row="2" ItemsSource="{Binding Nodes}" SelectedItem="{Binding $parent[UserControl].DataContext.SelectedNode, Mode=TwoWay}">
                         <ListBox.ItemTemplate>
@@ -75,74 +89,80 @@
                 </Grid>
             </Border>
 
-            <Border Grid.Column="2" Padding="16" BorderBrush="#24FFFFFF" BorderThickness="1" Background="#1CFFFFFF" CornerRadius="8">
+            <Border Grid.Column="2" Padding="16" BorderBrush="{DynamicResource ControlStrokeColorDefault}" BorderThickness="1" Background="{DynamicResource ControlFillColorDefaultBrush}" CornerRadius="8">
                 <Grid RowDefinitions="*,Auto" RowSpacing="14">
-                <ScrollViewer DataContext="{Binding SelectedNode}" HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
+                <fui:SmoothScrollViewer DataContext="{Binding SelectedNode}" HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
                     <StackPanel Spacing="14">
-                        <TextBlock Text="Node parameters" FontWeight="SemiBold" Foreground="#F8FBFF" />
+                        <TextBlock Text="Node parameters" FontWeight="SemiBold" Foreground="{DynamicResource TextFillColorPrimaryBrush}" />
                         <StackPanel Spacing="6" IsVisible="{Binding RequiresTemplate}">
-                            <TextBlock Text="Template path" Foreground="#B8C7D8" />
+                            <TextBlock Text="Template path" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
                             <TextBox Text="{Binding TemplatePath, Mode=TwoWay}" PlaceholderText="Template path" />
                             <Grid ColumnDefinitions="*,Auto">
-                                <TextBlock Text="Threshold" Foreground="#B8C7D8" />
-                                <TextBlock Grid.Column="1" Text="{Binding Threshold, StringFormat={}{0:0.00}}" Foreground="#B8C7D8" />
+                                <TextBlock Text="Threshold" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                                <TextBlock Grid.Column="1" Text="{Binding Threshold, StringFormat={}{0:0.00}}" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
                             </Grid>
                             <Slider Minimum="0.5" Maximum="0.99" Value="{Binding Threshold, Mode=TwoWay}" />
                             <CheckBox Content="Use Region" IsChecked="{Binding UseRegion, Mode=TwoWay}" />
                             <Grid ColumnDefinitions="*,*" RowDefinitions="Auto,Auto" ColumnSpacing="8" RowSpacing="8">
-                                <TextBox Text="{Binding RegionX, Mode=TwoWay}" PlaceholderText="X" />
-                                <TextBox Grid.Column="1" Text="{Binding RegionY, Mode=TwoWay}" PlaceholderText="Y" />
-                                <TextBox Grid.Row="1" Text="{Binding RegionWidth, Mode=TwoWay}" PlaceholderText="Width" />
-                                <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding RegionHeight, Mode=TwoWay}" PlaceholderText="Height" />
+                                <fui:NumberBox Value="{Binding RegionX, Mode=TwoWay}" SpinButtonPlacementMode="Inline" />
+                                <fui:NumberBox Grid.Column="1" Value="{Binding RegionY, Mode=TwoWay}" SpinButtonPlacementMode="Inline" />
+                                <fui:NumberBox Grid.Row="1" Value="{Binding RegionWidth, Mode=TwoWay}" Minimum="1" SpinButtonPlacementMode="Inline" />
+                                <fui:NumberBox Grid.Row="1" Grid.Column="1" Value="{Binding RegionHeight, Mode=TwoWay}" Minimum="1" SpinButtonPlacementMode="Inline" />
                             </Grid>
                         </StackPanel>
                         <StackPanel Spacing="6" IsVisible="{Binding IsScreenBehavior}">
-                            <TextBlock Text="Screen ID" Foreground="#B8C7D8" />
+                            <TextBlock Text="Screen ID" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
                             <TextBox Text="{Binding ScreenId, Mode=TwoWay}" PlaceholderText="main-menu" />
-                            <TextBlock Text="Excluded template path (optional)" Foreground="#B8C7D8" />
+                            <TextBlock Text="Excluded template path (optional)" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
                             <TextBox Text="{Binding ExcludedTemplatePath, Mode=TwoWay}" PlaceholderText="Loading or popup template" />
                             <TextBlock Text="The screen matches when this required template is visible."
                                        TextWrapping="Wrap"
                                        FontSize="12"
-                                       Foreground="#B8C7D8" />
+                                       Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
                         </StackPanel>
                         <StackPanel Spacing="6" IsVisible="{Binding RequiresTimeout}">
-                            <TextBlock Text="Timeout seconds" Foreground="#B8C7D8" />
-                            <TextBox Text="{Binding TimeoutSeconds, Mode=TwoWay}" />
+                            <TextBlock Text="Timeout seconds" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                            <fui:NumberBox Value="{Binding TimeoutSeconds, Mode=TwoWay}" Minimum="1" SpinButtonPlacementMode="Inline" />
                         </StackPanel>
                         <StackPanel Spacing="6" IsVisible="{Binding IsPressKey}">
-                            <TextBlock Text="Key" Foreground="#B8C7D8" />
+                            <TextBlock Text="Key" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
                             <ComboBox ItemsSource="{Binding $parent[UserControl].DataContext.AvailableKeys}" SelectedItem="{Binding Key, Mode=TwoWay}" />
                         </StackPanel>
                         <StackPanel Spacing="6" IsVisible="{Binding IsDelay}">
-                            <TextBlock Text="Delay milliseconds" Foreground="#B8C7D8" />
-                            <TextBox Text="{Binding DelayMilliseconds, Mode=TwoWay}" />
+                            <TextBlock Text="Delay milliseconds" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                            <fui:NumberBox Value="{Binding DelayMilliseconds, Mode=TwoWay}" Minimum="0" SpinButtonPlacementMode="Inline" />
                         </StackPanel>
                         <StackPanel Spacing="6" IsVisible="{Binding IsRunWorkflow}">
-                            <TextBlock Text="Workflow ID" Foreground="#B8C7D8" />
+                            <TextBlock Text="Workflow ID" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
                             <TextBox Text="{Binding WorkflowId, Mode=TwoWay}" />
                         </StackPanel>
                         <StackPanel Spacing="8" IsVisible="{Binding IsClickTemplate}">
-                            <TextBlock Text="Click options" Foreground="#B8C7D8" />
+                            <TextBlock Text="Click options" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
                             <Grid ColumnDefinitions="*,*" ColumnSpacing="8">
-                                <TextBox Text="{Binding ClickOffsetX, Mode=TwoWay}" PlaceholderText="Offset X" />
-                                <TextBox Grid.Column="1" Text="{Binding ClickOffsetY, Mode=TwoWay}" PlaceholderText="Offset Y" />
+                                <fui:NumberBox Value="{Binding ClickOffsetX, Mode=TwoWay}" SpinButtonPlacementMode="Inline" />
+                                <fui:NumberBox Grid.Column="1" Value="{Binding ClickOffsetY, Mode=TwoWay}" SpinButtonPlacementMode="Inline" />
                             </Grid>
                             <ComboBox ItemsSource="{Binding $parent[UserControl].DataContext.AvailableClickModes}" SelectedItem="{Binding ClickMode, Mode=TwoWay}" />
                             <Grid ColumnDefinitions="*,*" ColumnSpacing="8">
-                                <TextBox Text="{Binding ClickRepeatCount, Mode=TwoWay}" PlaceholderText="Repeat count" />
-                                <TextBox Grid.Column="1" Text="{Binding ClickIntervalMilliseconds, Mode=TwoWay}" PlaceholderText="Interval ms" />
+                                <fui:NumberBox Value="{Binding ClickRepeatCount, Mode=TwoWay}" Minimum="1" SpinButtonPlacementMode="Inline" />
+                                <fui:NumberBox Grid.Column="1" Value="{Binding ClickIntervalMilliseconds, Mode=TwoWay}" Minimum="1" SpinButtonPlacementMode="Inline" />
                             </Grid>
-                            <TextBox Text="{Binding ClickHoldDurationMilliseconds, Mode=TwoWay}" PlaceholderText="Hold duration ms" />
+                            <fui:NumberBox Value="{Binding ClickHoldDurationMilliseconds, Mode=TwoWay}" Minimum="1" SpinButtonPlacementMode="Inline" />
                             <CheckBox Content="Fail when template is not found" IsChecked="{Binding FailWhenNotFound, Mode=TwoWay}" />
                         </StackPanel>
                     </StackPanel>
-                </ScrollViewer>
+                </fui:SmoothScrollViewer>
                 <StackPanel Grid.Row="1" Spacing="8">
-                    <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="8">
-                        <TextBlock Text="Transitions" FontWeight="SemiBold" Foreground="#F8FBFF" VerticalAlignment="Center" />
-                        <Button Grid.Column="1" Content="Add" Command="{Binding AddTransitionCommand}" />
-                        <Button Grid.Column="2" Content="Remove" Command="{Binding RemoveTransitionCommand}" />
+                    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
+                        <TextBlock Text="Transitions" FontWeight="SemiBold" Foreground="{DynamicResource TextFillColorPrimaryBrush}" VerticalAlignment="Center" />
+                        <fui:CommandBar Grid.Column="1" DefaultLabelPosition="Right">
+                            <fui:CommandBar.PrimaryCommands>
+                                <fui:CommandBarButton IconSource="Add" Label="Add" Command="{Binding AddTransitionCommand}" />
+                            </fui:CommandBar.PrimaryCommands>
+                            <fui:CommandBar.SecondaryCommands>
+                                <fui:CommandBarButton IconSource="Delete" Label="Remove" Command="{Binding RemoveTransitionCommand}" />
+                            </fui:CommandBar.SecondaryCommands>
+                        </fui:CommandBar>
                     </Grid>
                     <ListBox MaxHeight="190"
                              ItemsSource="{Binding SelectedWorkflow.Transitions}"
@@ -188,6 +208,6 @@
             </Border>
         </Grid>
 
-        <TextBlock Grid.Row="2" Text="{Binding StatusText}" Foreground="#B8C7D8" />
+        <TextBlock Grid.Row="2" Text="{Binding StatusText}" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
     </Grid>
 </UserControl>

@@ -1,8 +1,42 @@
-﻿<UserControl xmlns="https://github.com/avaloniaui"
+<UserControl xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:constants="clr-namespace:OneTouchAutomation.Constants"
+             xmlns:fui="clr-namespace:AvaloniaFluentUI.Controls;assembly=AvaloniaFluentUI"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="OneTouchAutomation.Views.InfoPage">
-    infopage
+    <fui:SmoothScrollViewer HorizontalScrollBarVisibility="Disabled"
+                            VerticalScrollBarVisibility="Auto">
+        <StackPanel Margin="32"
+                    MaxWidth="760"
+                    Spacing="22">
+            <StackPanel Spacing="6">
+                <TextBlock Classes="page-title" Text="Application Info" />
+                <TextBlock Classes="page-subtitle" Text="OneTouchAutomation runtime and local capabilities." />
+            </StackPanel>
+            <Border Classes="surface" Padding="22">
+                <Grid RowDefinitions="Auto,Auto,Auto" RowSpacing="16">
+                    <Grid ColumnDefinitions="Auto,*" ColumnSpacing="14">
+                        <Border Width="42" Height="42" CornerRadius="7" Background="{DynamicResource ControlFillColorSecondaryBrush}">
+                            <TextBlock Classes="Icon" Text="{x:Static constants:Icon.Info}"
+                                       FontSize="18" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                        </Border>
+                        <StackPanel Grid.Column="1" Spacing="3">
+                            <TextBlock Text="OneTouchAutomation" FontSize="18" FontWeight="SemiBold" Foreground="{DynamicResource TextFillColorPrimaryBrush}" />
+                            <TextBlock Text="Windows desktop automation workspace" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                        </StackPanel>
+                    </Grid>
+                    <Grid Grid.Row="1" ColumnDefinitions="*,Auto" ColumnSpacing="16">
+                        <TextBlock Text="UI framework" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                        <TextBlock Grid.Column="1" Text="Avalonia UI" Foreground="{DynamicResource TextFillColorPrimaryBrush}" />
+                    </Grid>
+                    <Grid Grid.Row="2" ColumnDefinitions="*,Auto" ColumnSpacing="16">
+                        <TextBlock Text="Vision engine" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                        <TextBlock Grid.Column="1" Text="OpenCvSharp" Foreground="{DynamicResource TextFillColorPrimaryBrush}" />
+                    </Grid>
+                </Grid>
+            </Border>
+        </StackPanel>
+    </fui:SmoothScrollViewer>
 </UserControl>

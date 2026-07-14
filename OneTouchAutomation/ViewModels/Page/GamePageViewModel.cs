@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Avalonia.Threading;
+using AvaloniaFluentUI.Controls;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using OneTouchAutomation.Models;
@@ -105,6 +106,10 @@ public partial class GamePageViewModel : ViewModelBase
     private bool _isRunning;
 
     [ObservableProperty] private string _runStatus = "Select a window and add a task.";
+
+    [ObservableProperty] private InfoBarSeverity _runStatusSeverity = InfoBarSeverity.Informational;
+
+    [ObservableProperty] private bool _isRunStatusOpen = true;
 
     [RelayCommand]
     private async Task RefreshWindowsAsync()
@@ -614,6 +619,19 @@ public partial class GamePageViewModel : ViewModelBase
     private void AddLog(string message)
     {
         Dispatcher.UIThread.Post(() => Logs.Insert(0, message));
+    }
+
+    partial void OnRunStatusChanged(string value)
+    {
+        IsRunStatusOpen = true;
+        RunStatusSeverity = value.Contains("failed", StringComparison.OrdinalIgnoreCase)
+            ? InfoBarSeverity.Error
+            : value.Contains("cancelled", StringComparison.OrdinalIgnoreCase)
+                || value.StartsWith("No enabled", StringComparison.OrdinalIgnoreCase)
+                ? InfoBarSeverity.Warning
+                : IsRunning || value.StartsWith("Select", StringComparison.OrdinalIgnoreCase)
+                    ? InfoBarSeverity.Informational
+                    : InfoBarSeverity.Success;
     }
 
     private static bool IsSupportedTaskBehavior(IAutomationBehavior behavior)

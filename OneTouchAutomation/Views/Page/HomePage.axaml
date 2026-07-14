@@ -1,10 +1,73 @@
-﻿<UserControl xmlns="https://github.com/avaloniaui"
+<UserControl xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-             xmlns:views="clr-namespace:OneTouchAutomation.Views"
+             xmlns:constants="clr-namespace:OneTouchAutomation.Constants"
+             xmlns:fui="clr-namespace:AvaloniaFluentUI.Controls;assembly=AvaloniaFluentUI"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="OneTouchAutomation.Views.HomePage"
              Background="Transparent">
-    HomePage
+    <fui:SmoothScrollViewer HorizontalScrollBarVisibility="Disabled"
+                            VerticalScrollBarVisibility="Auto">
+        <Grid Margin="32"
+              MaxWidth="1180"
+              RowDefinitions="Auto,Auto,*"
+              RowSpacing="24">
+            <StackPanel Spacing="6">
+                <TextBlock Classes="page-title" Text="Automation Workspace" />
+                <TextBlock Classes="page-subtitle" Text="Game automation status and recent entry points." />
+            </StackPanel>
+
+            <Grid Grid.Row="1"
+                  ColumnDefinitions="*,*,*"
+                  ColumnSpacing="16">
+                <Border Classes="surface" Padding="18">
+                    <Grid ColumnDefinitions="Auto,*" ColumnSpacing="12">
+                        <Border Width="36" Height="36" CornerRadius="6" Background="#274C75">
+                            <TextBlock Classes="Icon" Text="{x:Static constants:Icon.Game}"
+                                       HorizontalAlignment="Center" VerticalAlignment="Center" />
+                        </Border>
+                        <StackPanel Grid.Column="1" Spacing="3">
+                            <TextBlock Text="Task Queue" FontWeight="SemiBold" Foreground="{DynamicResource TextFillColorPrimaryBrush}" />
+                            <TextBlock Text="Configure and run ordered automation tasks." Classes="page-subtitle" FontSize="12" />
+                        </StackPanel>
+                    </Grid>
+                </Border>
+                <Border Grid.Column="1" Classes="surface" Padding="18">
+                    <Grid ColumnDefinitions="Auto,*" ColumnSpacing="12">
+                        <Border Width="36" Height="36" CornerRadius="6" Background="#315E4B">
+                            <TextBlock Classes="Icon" Text="{x:Static constants:Icon.Workflow}"
+                                       HorizontalAlignment="Center" VerticalAlignment="Center" />
+                        </Border>
+                        <StackPanel Grid.Column="1" Spacing="3">
+                            <TextBlock Text="Workflow Graph" FontWeight="SemiBold" Foreground="{DynamicResource TextFillColorPrimaryBrush}" />
+                            <TextBlock Text="Compose reusable state-aware automation flows." Classes="page-subtitle" FontSize="12" />
+                        </StackPanel>
+                    </Grid>
+                </Border>
+                <Border Grid.Column="2" Classes="surface" Padding="18">
+                    <Grid ColumnDefinitions="Auto,*" ColumnSpacing="12">
+                        <Border Width="36" Height="36" CornerRadius="6" Background="#644A78">
+                            <TextBlock Classes="Icon" Text="{x:Static constants:Icon.Debug}"
+                                       HorizontalAlignment="Center" VerticalAlignment="Center" />
+                        </Border>
+                        <StackPanel Grid.Column="1" Spacing="3">
+                            <TextBlock Text="Visual Debug" FontWeight="SemiBold" Foreground="{DynamicResource TextFillColorPrimaryBrush}" />
+                            <TextBlock Text="Inspect capture, matching, and input results." Classes="page-subtitle" FontSize="12" />
+                        </StackPanel>
+                    </Grid>
+                </Border>
+            </Grid>
+
+            <Border Grid.Row="2" Classes="surface-subtle" Padding="22">
+                <StackPanel Spacing="14">
+                    <TextBlock Text="Runtime" FontSize="16" FontWeight="SemiBold" Foreground="{DynamicResource TextFillColorPrimaryBrush}" />
+                    <Grid ColumnDefinitions="Auto,*" ColumnSpacing="10">
+                        <Ellipse Width="8" Height="8" Fill="#6FCE9B" VerticalAlignment="Center" />
+                        <TextBlock Grid.Column="1" Text="Ready for a target game window." Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                    </Grid>
+                </StackPanel>
+            </Border>
+        </Grid>
+    </fui:SmoothScrollViewer>
 </UserControl>

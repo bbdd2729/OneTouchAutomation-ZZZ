@@ -4,6 +4,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:models="clr-namespace:OneTouchAutomation.Models"
              xmlns:vm="clr-namespace:OneTouchAutomation.ViewModels"
+             xmlns:fui="clr-namespace:AvaloniaFluentUI.Controls;assembly=AvaloniaFluentUI"
              mc:Ignorable="d"
              d:DesignWidth="1000"
              d:DesignHeight="650"
@@ -16,7 +17,7 @@
     </Design.DataContext>
 
     <Grid Margin="32"
-          RowDefinitions="Auto,Auto,*,150"
+          RowDefinitions="Auto,Auto,Auto,*,150"
           RowSpacing="18">
         <Grid ColumnDefinitions="*,Auto"
               ColumnSpacing="16">
@@ -24,27 +25,26 @@
                 <TextBlock Text="Game Automation"
                            FontSize="28"
                            FontWeight="SemiBold"
-                           Foreground="#F8FBFF" />
+                           Foreground="{DynamicResource TextFillColorPrimaryBrush}" />
                 <TextBlock Text="Create tasks and run them in order against a selected game window."
                            FontSize="14"
-                           Foreground="#B8C7D8" />
+                           Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
             </StackPanel>
 
-            <Button Grid.Column="1"
-                    MinWidth="118"
-                    Height="38"
-                    Command="{Binding AddTaskCommand}">
-                <TextBlock Text="New Task" />
-            </Button>
+            <fui:CommandBar Grid.Column="1"
+                            DefaultLabelPosition="Right">
+                <fui:CommandBar.PrimaryCommands>
+                    <fui:CommandBarButton IconSource="Add"
+                                          Label="New Task"
+                                          Command="{Binding AddTaskCommand}" />
+                </fui:CommandBar.PrimaryCommands>
+            </fui:CommandBar>
         </Grid>
 
         <Grid Grid.Row="1"
-              ColumnDefinitions="Auto,260,Auto,Auto,Auto,Auto,Auto,*"
-              ColumnSpacing="10">
-            <Button Content="Refresh Windows"
-                    Command="{Binding RefreshWindowsCommand}" />
-
-            <ComboBox Grid.Column="1"
+              ColumnDefinitions="260,*"
+              ColumnSpacing="12">
+            <ComboBox Height="36"
                       ItemsSource="{Binding Windows}"
                       SelectedItem="{Binding SelectedWindow, Mode=TwoWay}">
                 <ComboBox.ItemTemplate>
@@ -53,41 +53,46 @@
                     </DataTemplate>
                 </ComboBox.ItemTemplate>
             </ComboBox>
-
-            <Button Grid.Column="2"
-                    Content="Run All"
-                    Command="{Binding RunAllCommand}" />
-
-            <Button Grid.Column="3"
-                    Content="Cancel"
-                    Command="{Binding CancelRunCommand}" />
-
-            <Button Grid.Column="4"
-                    Content="Save Tasks"
-                    Command="{Binding SaveTasksCommand}" />
-
-            <Button Grid.Column="5"
-                    Content="Reload Tasks"
-                    Command="{Binding LoadTasksCommand}" />
-
-            <Button Grid.Column="6"
-                    Content="Reload Workflows"
-                    Command="{Binding LoadWorkflowsCommand}" />
-
-            <TextBlock Grid.Column="7"
-                       Text="{Binding RunStatus}"
-                       VerticalAlignment="Center"
-                       HorizontalAlignment="Right"
-                       Foreground="#B8C7D8" />
+            <fui:CommandBar Grid.Column="1"
+                            DefaultLabelPosition="Right">
+                <fui:CommandBar.PrimaryCommands>
+                    <fui:CommandBarButton IconSource="Refresh"
+                                          Label="Refresh Windows"
+                                          Command="{Binding RefreshWindowsCommand}" />
+                    <fui:CommandBarButton Label="Run All"
+                                          Command="{Binding RunAllCommand}" />
+                    <fui:CommandBarButton Label="Cancel"
+                                          Command="{Binding CancelRunCommand}" />
+                </fui:CommandBar.PrimaryCommands>
+                <fui:CommandBar.SecondaryCommands>
+                    <fui:CommandBarButton IconSource="Save"
+                                          Label="Save Tasks"
+                                          Command="{Binding SaveTasksCommand}" />
+                    <fui:CommandBarButton IconSource="Refresh"
+                                          Label="Reload Tasks"
+                                          Command="{Binding LoadTasksCommand}" />
+                    <fui:CommandBarButton IconSource="Refresh"
+                                          Label="Reload Workflows"
+                                          Command="{Binding LoadWorkflowsCommand}" />
+                </fui:CommandBar.SecondaryCommands>
+            </fui:CommandBar>
         </Grid>
 
-        <Grid Grid.Row="2"
+        <fui:InfoBar Grid.Row="2"
+                     Margin="0 0 0 2"
+                     Title="Task run"
+                     Message="{Binding RunStatus}"
+                     Severity="{Binding RunStatusSeverity}"
+                     IsClosable="True"
+                     IsOpen="{Binding IsRunStatusOpen, Mode=TwoWay}" />
+
+        <Grid Grid.Row="3"
               ColumnDefinitions="330,*"
               ColumnSpacing="18"
               MinHeight="320">
-            <Border BorderBrush="#24FFFFFF"
+            <Border BorderBrush="{DynamicResource ControlStrokeColorDefault}"
                     BorderThickness="1"
-                    Background="#1CFFFFFF"
+                    Background="{DynamicResource ControlFillColorDefaultBrush}"
                     CornerRadius="8">
                 <Grid RowDefinitions="Auto,*">
                     <Grid Margin="18"
@@ -95,10 +100,10 @@
                         <TextBlock Text="Tasks"
                                    FontSize="16"
                                    FontWeight="SemiBold"
-                                   Foreground="#F8FBFF" />
-                        <TextBlock Grid.Column="1"
-                                   Text="{Binding Tasks.Count}"
-                                   Foreground="#B8C7D8" />
+                                   Foreground="{DynamicResource TextFillColorPrimaryBrush}" />
+                        <fui:InfoBadge Grid.Column="1"
+                                       Value="{Binding Tasks.Count}"
+                                       Classes="Informational" />
                     </Grid>
 
                     <ListBox Grid.Row="1"
@@ -116,13 +121,13 @@
                                       RowSpacing="6">
                                     <TextBlock Text="{Binding Name}"
                                                FontWeight="SemiBold"
-                                               Foreground="#F8FBFF" />
+                                               Foreground="{DynamicResource TextFillColorPrimaryBrush}" />
                                     <ToggleSwitch Grid.Column="1"
                                                   IsChecked="{Binding IsEnabled, Mode=TwoWay}" />
                                     <TextBlock Grid.Row="1"
                                                Grid.ColumnSpan="2"
                                                Text="{Binding BehaviorDisplayName}"
-                                               Foreground="#B8C7D8" />
+                                               Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
                                 </Grid>
                             </DataTemplate>
                         </ListBox.ItemTemplate>
@@ -132,42 +137,43 @@
 
             <Border Grid.Column="1"
                     Padding="24"
-                    BorderBrush="#24FFFFFF"
+                    BorderBrush="{DynamicResource ControlStrokeColorDefault}"
                     BorderThickness="1"
-                    Background="#20FFFFFF"
+                    Background="{DynamicResource ControlFillColorSecondaryBrush}"
                     CornerRadius="8">
                 <Grid DataContext="{Binding SelectedTask}"
                       RowDefinitions="Auto,*">
-                    <Grid ColumnDefinitions="*,Auto,Auto,Auto,Auto"
+                    <Grid ColumnDefinitions="*,Auto"
                           ColumnSpacing="8">
                         <StackPanel Spacing="5">
                             <TextBlock Text="Task Details"
                                        FontSize="18"
                                        FontWeight="SemiBold"
-                                       Foreground="#F8FBFF" />
+                                       Foreground="{DynamicResource TextFillColorPrimaryBrush}" />
                             <TextBlock Text="Configure a template behavior for the selected task."
                                        TextWrapping="Wrap"
-                                       Foreground="#B8C7D8" />
+                                       Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
                         </StackPanel>
 
-                        <Button Grid.Column="1"
-                                Content="Up"
-                                Command="{Binding $parent[UserControl].DataContext.MoveTaskUpCommand}" />
-
-                        <Button Grid.Column="2"
-                                Content="Down"
-                                Command="{Binding $parent[UserControl].DataContext.MoveTaskDownCommand}" />
-
-                        <Button Grid.Column="3"
-                                Content="Duplicate"
-                                Command="{Binding $parent[UserControl].DataContext.DuplicateTaskCommand}" />
-
-                        <Button Grid.Column="4"
-                                Content="Remove"
-                                Command="{Binding $parent[UserControl].DataContext.RemoveTaskCommand}" />
+                        <fui:CommandBar Grid.Column="1"
+                                        DefaultLabelPosition="Right">
+                            <fui:CommandBar.PrimaryCommands>
+                                <fui:CommandBarButton Label="Duplicate"
+                                                      Command="{Binding $parent[UserControl].DataContext.DuplicateTaskCommand}" />
+                            </fui:CommandBar.PrimaryCommands>
+                            <fui:CommandBar.SecondaryCommands>
+                                <fui:CommandBarButton Label="Move Up"
+                                                      Command="{Binding $parent[UserControl].DataContext.MoveTaskUpCommand}" />
+                                <fui:CommandBarButton Label="Move Down"
+                                                      Command="{Binding $parent[UserControl].DataContext.MoveTaskDownCommand}" />
+                                <fui:CommandBarButton IconSource="Delete"
+                                                      Label="Remove"
+                                                      Command="{Binding $parent[UserControl].DataContext.RemoveTaskCommand}" />
+                            </fui:CommandBar.SecondaryCommands>
+                        </fui:CommandBar>
                     </Grid>
 
-                    <ScrollViewer Grid.Row="1"
+                    <fui:SmoothScrollViewer Grid.Row="1"
                                   Margin="0 20 0 0"
                                   HorizontalScrollBarVisibility="Disabled"
                                   VerticalScrollBarVisibility="Auto">
@@ -175,7 +181,7 @@
                           RowSpacing="16">
                         <StackPanel Spacing="6">
                             <TextBlock Text="Task name"
-                                       Foreground="#B8C7D8" />
+                                       Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
                             <TextBox Text="{Binding Name, Mode=TwoWay}"
                                      PlaceholderText="Task name" />
                         </StackPanel>
@@ -183,7 +189,7 @@
                         <StackPanel Grid.Row="1"
                                     Spacing="6">
                             <TextBlock Text="Behavior"
-                                       Foreground="#B8C7D8" />
+                                       Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
                             <ComboBox ItemsSource="{Binding $parent[UserControl].DataContext.AvailableBehaviors}"
                                       SelectedValue="{Binding BehaviorId, Mode=TwoWay}"
                                       SelectedValueBinding="{Binding Id}">
@@ -199,7 +205,7 @@
                                     Spacing="6"
                                     IsVisible="{Binding RequiresTemplate}">
                             <TextBlock Text="Template path"
-                                       Foreground="#B8C7D8" />
+                                       Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
                             <Grid ColumnDefinitions="*,Auto"
                                   ColumnSpacing="8">
                                 <TextBox Text="{Binding TemplatePath}"
@@ -217,10 +223,10 @@
                                         IsVisible="{Binding RequiresTemplate}">
                                 <Grid ColumnDefinitions="*,Auto">
                                     <TextBlock Text="Threshold"
-                                               Foreground="#B8C7D8" />
+                                               Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
                                     <TextBlock Grid.Column="1"
                                                Text="{Binding Threshold, StringFormat={}{0:0.00}}"
-                                               Foreground="#B8C7D8" />
+                                               Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
                                 </Grid>
                                 <Slider Minimum="0.5"
                                         Maximum="0.99"
@@ -230,28 +236,29 @@
                             <StackPanel Spacing="6"
                                         IsVisible="{Binding IsWaitForTemplate}">
                                 <TextBlock Text="Wait timeout seconds"
-                                           Foreground="#B8C7D8" />
-                                <TextBox Text="{Binding TimeoutSeconds, Mode=TwoWay}"
-                                         PlaceholderText="10" />
+                                           Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                                <fui:NumberBox Value="{Binding TimeoutSeconds, Mode=TwoWay}"
+                                               Minimum="1"
+                                               SpinButtonPlacementMode="Inline" />
                             </StackPanel>
                             <StackPanel Spacing="6"
                                         IsVisible="{Binding IsPressKey}">
                                 <TextBlock Text="Key"
-                                           Foreground="#B8C7D8" />
+                                           Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
                                 <ComboBox ItemsSource="{Binding $parent[UserControl].DataContext.AvailableKeys}"
                                           SelectedItem="{Binding Key, Mode=TwoWay}" />
                             </StackPanel>
                             <StackPanel Spacing="6"
                                         IsVisible="{Binding IsDelay}">
                                 <TextBlock Text="Delay milliseconds"
-                                           Foreground="#B8C7D8" />
+                                           Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
                                 <TextBox Text="{Binding DelayMilliseconds, Mode=TwoWay}"
                                          PlaceholderText="500" />
                             </StackPanel>
                             <StackPanel Spacing="6"
                                         IsVisible="{Binding IsWorkflowSelection}">
                                 <TextBlock Text="Workflow"
-                                           Foreground="#B8C7D8" />
+                                           Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
                                 <ComboBox ItemsSource="{Binding $parent[UserControl].DataContext.AvailableWorkflows}"
                                           SelectedValue="{Binding WorkflowId, Mode=TwoWay}"
                                           SelectedValueBinding="{Binding Id}">
@@ -265,51 +272,57 @@
                             <StackPanel Spacing="8"
                                         IsVisible="{Binding IsDailyWorkflow}">
                                 <TextBlock Text="Game refresh hour"
-                                           Foreground="#B8C7D8" />
-                                <TextBox Text="{Binding GameRefreshHour, Mode=TwoWay}"
-                                         PlaceholderText="4" />
+                                           Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                                <fui:NumberBox Value="{Binding GameRefreshHour, Mode=TwoWay}"
+                                               Minimum="0"
+                                               Maximum="23"
+                                               SpinButtonPlacementMode="Inline" />
                                 <CheckBox Content="Force run even if already completed today"
                                           IsChecked="{Binding ForceDailyRun, Mode=TwoWay}" />
                             </StackPanel>
                             <StackPanel Spacing="8"
                                         IsVisible="{Binding IsClickTemplate}">
                                 <TextBlock Text="Click options"
-                                           Foreground="#B8C7D8" />
+                                           Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
                                 <Grid ColumnDefinitions="*,*"
                                       ColumnSpacing="8">
-                                    <TextBox Text="{Binding ClickOffsetX, Mode=TwoWay}"
-                                             PlaceholderText="Offset X" />
-                                    <TextBox Grid.Column="1"
-                                             Text="{Binding ClickOffsetY, Mode=TwoWay}"
-                                             PlaceholderText="Offset Y" />
+                                    <fui:NumberBox Value="{Binding ClickOffsetX, Mode=TwoWay}"
+                                                   SpinButtonPlacementMode="Inline" />
+                                    <fui:NumberBox Grid.Column="1"
+                                                   Value="{Binding ClickOffsetY, Mode=TwoWay}"
+                                                   SpinButtonPlacementMode="Inline" />
                                 </Grid>
                                 <ComboBox ItemsSource="{Binding $parent[UserControl].DataContext.AvailableClickModes}"
                                           SelectedItem="{Binding ClickMode, Mode=TwoWay}" />
                                 <Grid ColumnDefinitions="*,*"
                                       ColumnSpacing="8">
-                                    <TextBox Text="{Binding ClickRepeatCount, Mode=TwoWay}"
-                                             PlaceholderText="Repeat count" />
-                                    <TextBox Grid.Column="1"
-                                             Text="{Binding ClickIntervalMilliseconds, Mode=TwoWay}"
-                                             PlaceholderText="Interval ms" />
+                                    <fui:NumberBox Value="{Binding ClickRepeatCount, Mode=TwoWay}"
+                                                   Minimum="1"
+                                                   SpinButtonPlacementMode="Inline" />
+                                    <fui:NumberBox Grid.Column="1"
+                                                   Value="{Binding ClickIntervalMilliseconds, Mode=TwoWay}"
+                                                   Minimum="1"
+                                                   SpinButtonPlacementMode="Inline" />
                                 </Grid>
-                                <TextBox Text="{Binding ClickHoldDurationMilliseconds, Mode=TwoWay}"
-                                         PlaceholderText="Hold duration ms" />
+                                <fui:NumberBox Value="{Binding ClickHoldDurationMilliseconds, Mode=TwoWay}"
+                                               Minimum="1"
+                                               SpinButtonPlacementMode="Inline" />
                             </StackPanel>
                             <Grid ColumnDefinitions="*,*"
                                   ColumnSpacing="12">
                                 <StackPanel Spacing="6">
                                     <TextBlock Text="Failure policy"
-                                               Foreground="#B8C7D8" />
+                                               Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
                                     <ComboBox ItemsSource="{Binding $parent[UserControl].DataContext.FailurePolicies}"
                                               SelectedItem="{Binding FailurePolicy, Mode=TwoWay}" />
                                 </StackPanel>
                                 <StackPanel Grid.Column="1"
                                             Spacing="6">
                                     <TextBlock Text="Retry count"
-                                               Foreground="#B8C7D8" />
-                                    <TextBox Text="{Binding MaxRetryCount, Mode=TwoWay}"
-                                             PlaceholderText="Used by Retry" />
+                                               Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                                    <fui:NumberBox Value="{Binding MaxRetryCount, Mode=TwoWay}"
+                                                   Minimum="0"
+                                                   SpinButtonPlacementMode="Inline" />
                                 </StackPanel>
                             </Grid>
                         </StackPanel>
@@ -323,63 +336,55 @@
                                   RowDefinitions="Auto,Auto"
                                   ColumnSpacing="8"
                                   RowSpacing="8">
-                                <TextBox Text="{Binding RegionX, Mode=TwoWay}"
-                                         PlaceholderText="X" />
-                                <TextBox Grid.Column="1"
-                                         Text="{Binding RegionY, Mode=TwoWay}"
-                                         PlaceholderText="Y" />
-                                <TextBox Grid.Row="1"
-                                         Text="{Binding RegionWidth, Mode=TwoWay}"
-                                         PlaceholderText="Width" />
-                                <TextBox Grid.Row="1"
-                                         Grid.Column="1"
-                                         Text="{Binding RegionHeight, Mode=TwoWay}"
-                                         PlaceholderText="Height" />
+                                <fui:NumberBox Value="{Binding RegionX, Mode=TwoWay}" SpinButtonPlacementMode="Inline" />
+                                <fui:NumberBox Grid.Column="1" Value="{Binding RegionY, Mode=TwoWay}" SpinButtonPlacementMode="Inline" />
+                                <fui:NumberBox Grid.Row="1" Value="{Binding RegionWidth, Mode=TwoWay}" Minimum="1" SpinButtonPlacementMode="Inline" />
+                                <fui:NumberBox Grid.Row="1" Grid.Column="1" Value="{Binding RegionHeight, Mode=TwoWay}" Minimum="1" SpinButtonPlacementMode="Inline" />
                             </Grid>
                         </StackPanel>
                     </Grid>
-                    </ScrollViewer>
+                    </fui:SmoothScrollViewer>
                 </Grid>
             </Border>
         </Grid>
 
-        <Border Grid.Row="3"
+        <Border Grid.Row="4"
                 Padding="12"
-                BorderBrush="#24FFFFFF"
+                BorderBrush="{DynamicResource ControlStrokeColorDefault}"
                 BorderThickness="1"
-                Background="#14000000"
+                Background="{DynamicResource ControlFillColorTertiaryBrush}"
                 CornerRadius="8">
             <Grid ColumnDefinitions="*,300"
                   ColumnSpacing="16">
-                <ScrollViewer VerticalScrollBarVisibility="Auto">
+                <fui:SmoothScrollViewer VerticalScrollBarVisibility="Auto">
                     <ItemsControl ItemsSource="{Binding Logs}">
                         <ItemsControl.ItemTemplate>
                             <DataTemplate>
                                 <TextBlock Text="{Binding}"
                                            FontSize="12"
-                                           Foreground="#B8C7D8" />
+                                           Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
                             </DataTemplate>
                         </ItemsControl.ItemTemplate>
                     </ItemsControl>
-                </ScrollViewer>
+                </fui:SmoothScrollViewer>
 
                 <StackPanel Grid.Column="1"
                             Spacing="6">
                     <TextBlock Text="Run History"
                                FontWeight="SemiBold"
-                               Foreground="#F8FBFF" />
-                    <ScrollViewer VerticalScrollBarVisibility="Auto">
+                               Foreground="{DynamicResource TextFillColorPrimaryBrush}" />
+                    <fui:SmoothScrollViewer VerticalScrollBarVisibility="Auto">
                         <ItemsControl ItemsSource="{Binding RunHistory}">
                             <ItemsControl.ItemTemplate>
                                 <DataTemplate>
                                     <TextBlock Text="{Binding DisplayText}"
                                                FontSize="12"
                                                TextWrapping="Wrap"
-                                               Foreground="#B8C7D8" />
+                                               Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
                                 </DataTemplate>
                             </ItemsControl.ItemTemplate>
                         </ItemsControl>
-                    </ScrollViewer>
+                    </fui:SmoothScrollViewer>
                 </StackPanel>
             </Grid>
         </Border>
