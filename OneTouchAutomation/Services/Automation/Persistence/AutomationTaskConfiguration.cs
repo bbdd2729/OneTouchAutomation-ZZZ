@@ -49,5 +49,9 @@ public sealed class AutomationTaskConfiguration
 
     public string WorkflowId { get; init; } = string.Empty;
 
+    public int GameRefreshHour { get; init; } = 4;
+
+    public bool ForceDailyRun { get; init; }
+
     public bool IsEnabled { get; init; } = true;
 }

@@ -249,7 +249,7 @@
                                          PlaceholderText="500" />
                             </StackPanel>
                             <StackPanel Spacing="6"
-                                        IsVisible="{Binding IsRunWorkflow}">
+                                        IsVisible="{Binding IsWorkflowSelection}">
                                 <TextBlock Text="Workflow"
                                            Foreground="#B8C7D8" />
                                 <ComboBox ItemsSource="{Binding $parent[UserControl].DataContext.AvailableWorkflows}"
@@ -261,6 +261,15 @@
                                         </DataTemplate>
                                     </ComboBox.ItemTemplate>
                                 </ComboBox>
+                            </StackPanel>
+                            <StackPanel Spacing="8"
+                                        IsVisible="{Binding IsDailyWorkflow}">
+                                <TextBlock Text="Game refresh hour"
+                                           Foreground="#B8C7D8" />
+                                <TextBox Text="{Binding GameRefreshHour, Mode=TwoWay}"
+                                         PlaceholderText="4" />
+                                <CheckBox Content="Force run even if already completed today"
+                                          IsChecked="{Binding ForceDailyRun, Mode=TwoWay}" />
                             </StackPanel>
                             <StackPanel Spacing="8"
                                         IsVisible="{Binding IsClickTemplate}">

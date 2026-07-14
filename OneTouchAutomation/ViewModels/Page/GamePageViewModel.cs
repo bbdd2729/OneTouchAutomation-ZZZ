@@ -443,6 +443,12 @@ public partial class GamePageViewModel : ViewModelBase
             {
                 WorkflowId = task.WorkflowId
             },
+            "run-daily-workflow" => new RunDailyWorkflowBehaviorParameters
+            {
+                WorkflowId = task.WorkflowId,
+                GameRefreshHour = task.GameRefreshHour,
+                ForceRun = task.ForceDailyRun
+            },
             _ => throw new InvalidOperationException($"Unsupported task behavior: {task.BehaviorId}")
         };
 
@@ -525,6 +531,8 @@ public partial class GamePageViewModel : ViewModelBase
             ClickIntervalMilliseconds = task.ClickIntervalMilliseconds,
             ClickHoldDurationMilliseconds = task.ClickHoldDurationMilliseconds,
             WorkflowId = task.WorkflowId,
+            GameRefreshHour = task.GameRefreshHour,
+            ForceDailyRun = task.ForceDailyRun,
             IsEnabled = task.IsEnabled
         };
     }
@@ -555,6 +563,8 @@ public partial class GamePageViewModel : ViewModelBase
             ClickIntervalMilliseconds = configuration.ClickIntervalMilliseconds,
             ClickHoldDurationMilliseconds = configuration.ClickHoldDurationMilliseconds,
             WorkflowId = configuration.WorkflowId,
+            GameRefreshHour = configuration.GameRefreshHour,
+            ForceDailyRun = configuration.ForceDailyRun,
             IsEnabled = configuration.IsEnabled
         };
     }
@@ -584,6 +594,8 @@ public partial class GamePageViewModel : ViewModelBase
             ClickIntervalMilliseconds = source.ClickIntervalMilliseconds,
             ClickHoldDurationMilliseconds = source.ClickHoldDurationMilliseconds,
             WorkflowId = source.WorkflowId,
+            GameRefreshHour = source.GameRefreshHour,
+            ForceDailyRun = source.ForceDailyRun,
             IsEnabled = source.IsEnabled
         };
     }
@@ -606,6 +618,6 @@ public partial class GamePageViewModel : ViewModelBase
 
     private static bool IsSupportedTaskBehavior(IAutomationBehavior behavior)
     {
-        return behavior.Id is "click-template" or "wait-for-template" or "press-key" or "delay" or "run-workflow";
+        return behavior.Id is "click-template" or "wait-for-template" or "press-key" or "delay" or "run-workflow" or "run-daily-workflow";
     }
 }
