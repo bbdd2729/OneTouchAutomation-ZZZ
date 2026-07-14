@@ -71,6 +71,7 @@ public class App : Application
                                                (
                         "OneTouchAutomation.Services.Capture",
                         "OneTouchAutomation.Services.Automation.History",
+                        "OneTouchAutomation.Services.Automation.State",
                         "OneTouchAutomation.Services.Automation.Persistence",
                         "OneTouchAutomation.Services.Automation.Daily",
                         "OneTouchAutomation.Services.Automation.Workflows",
