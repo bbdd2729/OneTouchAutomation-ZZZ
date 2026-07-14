@@ -3,6 +3,8 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:vm="clr-namespace:OneTouchAutomation.ViewModels"
+             xmlns:fui="clr-namespace:AvaloniaFluentUI.Controls;assembly=AvaloniaFluentUI"
+             xmlns:fi="clr-namespace:AvaloniaFluentUI.Icons;assembly=AvaloniaFluentUI"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="OneTouchAutomation.Views.SettingsPage"
              x:DataType="vm:SettingsPageViewModel"
@@ -11,7 +13,7 @@
         <vm:SettingsPageViewModel />
     </Design.DataContext>
 
-    <ScrollViewer>
+    <fui:SmoothScrollViewer>
         <StackPanel Margin="32"
                     Spacing="22"
                     MaxWidth="760">
@@ -19,86 +21,84 @@
                 <TextBlock Text="Settings"
                            FontSize="28"
                            FontWeight="SemiBold"
-                           Foreground="#F8FBFF" />
-                <TextBlock Text="Acrylic material"
+                           Foreground="{DynamicResource TextFillColorPrimaryBrush}" />
+                <TextBlock Text="Theme and Windows material"
                            FontSize="14"
-                           Foreground="#B8C7D8" />
+                           Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
             </StackPanel>
 
-            <Border CornerRadius="8"
-                    Padding="22"
-                    BorderBrush="#24FFFFFF"
-                    BorderThickness="1"
-                    Background="#20FFFFFF">
-                <StackPanel Spacing="20">
+            <fui:SettingCard Header="Window material"
+                             Description="Choose the Windows backdrop used by the application window."
+                             IconSource="{x:Static fi:FluentIcon.Transparent}">
                     <StackPanel Spacing="10">
-                        <TextBlock Text="Theme color"
-                                   FontSize="15"
-                                   FontWeight="SemiBold"
-                                   Foreground="#F8FBFF" />
-                        <ItemsControl ItemsSource="{Binding ThemeColors}">
-                            <ItemsControl.ItemsPanel>
-                                <ItemsPanelTemplate>
-                                    <WrapPanel />
-                                </ItemsPanelTemplate>
-                            </ItemsControl.ItemsPanel>
-                            <ItemsControl.ItemTemplate>
-                                <DataTemplate DataType="vm:AcrylicThemeColorOption">
-                                    <Button Margin="0 0 10 10"
-                                            Padding="0"
-                                            Background="Transparent"
-                                            BorderBrush="Transparent"
-                                            Command="{Binding $parent[UserControl].DataContext.SelectThemeColorCommand}"
-                                            CommandParameter="{Binding}">
-                                        <Border Width="94"
-                                                Height="42"
-                                                CornerRadius="7"
-                                                BorderBrush="#36FFFFFF"
-                                                BorderThickness="1"
-                                                Background="{Binding TintColor}">
-                                            <TextBlock Text="{Binding Name}"
-                                                       HorizontalAlignment="Center"
-                                                       VerticalAlignment="Center"
-                                                       FontSize="13"
-                                                       Foreground="#F8FBFF" />
-                                        </Border>
-                                    </Button>
-                                </DataTemplate>
-                            </ItemsControl.ItemTemplate>
-                        </ItemsControl>
+                        <StackPanel Orientation="Horizontal"
+                                    Spacing="8">
+                            <RadioButton Content="None"
+                                         IsChecked="{Binding IsNoWindowMaterial}"
+                                         Command="{Binding SelectWindowMaterialCommand}"
+                                         CommandParameter="{x:Static vm:WindowMaterialMode.None}"
+                                         Theme="{StaticResource ChipsRadioButton}" />
+                            <RadioButton Content="Mica"
+                                         IsChecked="{Binding IsMicaWindowMaterial}"
+                                         IsEnabled="{Binding IsWindows11}"
+                                         Command="{Binding SelectWindowMaterialCommand}"
+                                         CommandParameter="{x:Static vm:WindowMaterialMode.Mica}"
+                                         Theme="{StaticResource ChipsRadioButton}" />
+                            <RadioButton Content="Acrylic"
+                                         IsChecked="{Binding IsAcrylicWindowMaterial}"
+                                         Command="{Binding SelectWindowMaterialCommand}"
+                                         CommandParameter="{x:Static vm:WindowMaterialMode.Acrylic}"
+                                         Theme="{StaticResource ChipsRadioButton}" />
+                        </StackPanel>
                     </StackPanel>
+            </fui:SettingCard>
 
-                    <StackPanel Spacing="8">
-                        <Grid ColumnDefinitions="*,Auto">
-                            <TextBlock Text="Tint opacity"
-                                       FontSize="14"
-                                       Foreground="#F8FBFF" />
-                            <TextBlock Grid.Column="1"
-                                       Text="{Binding Appearance.AcrylicTintOpacity, StringFormat={}{0:P0}}"
-                                       Foreground="#B8C7D8" />
-                        </Grid>
-                        <Slider Minimum="0.35"
-                                Maximum="0.95"
-                                TickFrequency="0.05"
-                                Value="{Binding Appearance.AcrylicTintOpacity, Mode=TwoWay}" />
-                    </StackPanel>
-
-                    <StackPanel Spacing="8">
-                        <Grid ColumnDefinitions="*,Auto">
-                            <TextBlock Text="Blur intensity"
-                                       FontSize="14"
-                                       Foreground="#F8FBFF" />
-                            <TextBlock Grid.Column="1"
-                                       Text="{Binding Appearance.AcrylicMaterialOpacity, StringFormat={}{0:P0}}"
-                                       Foreground="#B8C7D8" />
-                        </Grid>
-                        <Slider Minimum="0.25"
-                                Maximum="0.85"
-                                TickFrequency="0.05"
-                                Value="{Binding Appearance.AcrylicMaterialOpacity, Mode=TwoWay}" />
-                    </StackPanel>
+            <fui:SettingCard Header="Application theme"
+                             Description="Choose a light, dark, or system-following Fluent theme."
+                             IconSource="{x:Static fi:FluentIcon.Setting}">
+                <StackPanel Orientation="Horizontal" Spacing="8">
+                    <RadioButton Content="System"
+                                 IsChecked="{Binding IsSystemTheme}"
+                                 Command="{Binding SelectThemeCommand}"
+                                 CommandParameter="{x:Static vm:AppThemeMode.System}"
+                                 Theme="{StaticResource ChipsRadioButton}" />
+                    <RadioButton Content="Light"
+                                 IsChecked="{Binding IsLightTheme}"
+                                 Command="{Binding SelectThemeCommand}"
+                                 CommandParameter="{x:Static vm:AppThemeMode.Light}"
+                                 Theme="{StaticResource ChipsRadioButton}" />
+                    <RadioButton Content="Dark"
+                                 IsChecked="{Binding IsDarkTheme}"
+                                 Command="{Binding SelectThemeCommand}"
+                                 CommandParameter="{x:Static vm:AppThemeMode.Dark}"
+                                 Theme="{StaticResource ChipsRadioButton}" />
                 </StackPanel>
-            </Border>
+            </fui:SettingCard>
+
+            <fui:SettingCard Header="Accent color"
+                             Description="Use the system accent color or select a custom Fluent accent."
+                             IconSource="{x:Static fi:FluentIcon.Setting}">
+                <StackPanel Spacing="8">
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                        <RadioButton Content="System accent"
+                                     IsChecked="{Binding IsDefaultAccentColor}"
+                                     Theme="{StaticResource ChipsRadioButton}" />
+                        <RadioButton Content="Custom accent"
+                                     IsChecked="{Binding IsCustomAccentColor}"
+                                     Theme="{StaticResource ChipsRadioButton}" />
+                    </StackPanel>
+                    <Grid ColumnDefinitions="Auto,*"
+                          ColumnSpacing="12"
+                          IsEnabled="{Binding IsCustomAccentColor}">
+                        <TextBlock Text="Select color"
+                                   VerticalAlignment="Center"
+                                   Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                        <fui:ColorPickerButton Grid.Column="1"
+                                               HorizontalAlignment="Left"
+                                               Color="{Binding SelectedAccentColor, Mode=TwoWay}" />
+                    </Grid>
+                </StackPanel>
+            </fui:SettingCard>
         </StackPanel>
-    </ScrollViewer>
+    </fui:SmoothScrollViewer>
 </UserControl>
