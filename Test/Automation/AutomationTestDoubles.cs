@@ -16,8 +16,14 @@ internal sealed class StubScreenCaptureService : IScreenCaptureService
 
     public int ClientCaptureCount { get; private set; }
 
+    public int ScreenCaptureCount { get; private set; }
+
     public Task<CapturedFrame> CaptureScreenAsync(CancellationToken cancellationToken = default)
-        => throw new NotSupportedException();
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        ScreenCaptureCount++;
+        return Task.FromResult(Frame);
+    }
 
     public Task<CapturedFrame> CaptureWindowAsync(string windowTitleKeyword, CancellationToken cancellationToken = default)
         => throw new NotSupportedException();
@@ -58,12 +64,21 @@ internal sealed class RecordingInputService : IInputService
 
     public TemplateMatchResult? ClickResult { get; private set; }
 
+    public MouseClickOptions? ClickOptions { get; private set; }
+
     public List<AutomationKey> PressedKeys { get; } = new();
 
     public Task MoveMouseAsync(int screenX, int screenY, CancellationToken cancellationToken = default)
         => Task.CompletedTask;
 
     public Task ClickAsync(int screenX, int screenY, CancellationToken cancellationToken = default)
+        => Task.CompletedTask;
+
+    public Task ClickAsync(
+        int screenX,
+        int screenY,
+        MouseClickOptions options,
+        CancellationToken cancellationToken = default)
         => Task.CompletedTask;
 
     public Task PressKeyAsync(AutomationKey key, CancellationToken cancellationToken = default)
@@ -79,6 +94,18 @@ internal sealed class RecordingInputService : IInputService
     {
         ClickFrame = frame;
         ClickResult = result;
+        return Task.CompletedTask;
+    }
+
+    public Task ClickMatchAsync(
+        CapturedFrame frame,
+        TemplateMatchResult result,
+        MouseClickOptions options,
+        CancellationToken cancellationToken = default)
+    {
+        ClickFrame = frame;
+        ClickResult = result;
+        ClickOptions = options;
         return Task.CompletedTask;
     }
 }

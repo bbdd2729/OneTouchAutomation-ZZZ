@@ -90,19 +90,30 @@ public class ClickTemplateBehaviorTests
                     RegionX = 5,
                     RegionY = 6,
                     RegionWidth = 200,
-                    RegionHeight = 100
+                    RegionHeight = 100,
+                    ClickOffsetX = 7,
+                    ClickOffsetY = -3,
+                    ClickMode = OneTouchAutomation.Services.Input.MouseClickMode.Repeat,
+                    ClickRepeatCount = 3,
+                    ClickIntervalMilliseconds = 120,
+                    ClickHoldDurationMilliseconds = 80
                 },
                 TestContext.Current.CancellationToken);
 
             Assert.True(result.IsSuccess);
-            Assert.Equal(125, result.ScreenX);
-            Assert.Equal(240, result.ScreenY);
+            Assert.Equal(132, result.ScreenX);
+            Assert.Equal(237, result.ScreenY);
             Assert.Equal(1, capture.ClientCaptureCount);
             Assert.Single(vision.Requests);
             Assert.Equal(0.9, vision.Requests[0].Threshold);
             Assert.True(vision.Requests[0].UseRegion);
             Assert.Same(frame, input.ClickFrame);
             Assert.Same(vision.Result, input.ClickResult);
+            Assert.NotNull(input.ClickOptions);
+            Assert.Equal(OneTouchAutomation.Services.Input.MouseClickMode.Repeat, input.ClickOptions.Mode);
+            Assert.Equal(3, input.ClickOptions.RepeatCount);
+            Assert.Equal(7, input.ClickOptions.OffsetX);
+            Assert.Equal(-3, input.ClickOptions.OffsetY);
             Assert.Contains(logs, message => message.StartsWith("Matched:"));
         }
         finally

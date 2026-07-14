@@ -20,6 +20,8 @@ public partial class AutomationTaskModel : ObservableObject
 
     public bool RequiresTemplate => BehaviorId is "click-template" or "wait-for-template";
 
+    public bool IsClickTemplate => BehaviorId == "click-template";
+
     public bool IsWaitForTemplate => BehaviorId == "wait-for-template";
 
     public bool IsPressKey => BehaviorId == "press-key";
@@ -52,12 +54,25 @@ public partial class AutomationTaskModel : ObservableObject
 
     [ObservableProperty] private int _delayMilliseconds = 500;
 
+    [ObservableProperty] private int _clickOffsetX;
+
+    [ObservableProperty] private int _clickOffsetY;
+
+    [ObservableProperty] private MouseClickMode _clickMode = MouseClickMode.Single;
+
+    [ObservableProperty] private int _clickRepeatCount = 1;
+
+    [ObservableProperty] private int _clickIntervalMilliseconds = 100;
+
+    [ObservableProperty] private int _clickHoldDurationMilliseconds = 60;
+
     [ObservableProperty] private bool _isEnabled = true;
 
     partial void OnBehaviorIdChanged(string value)
     {
         OnPropertyChanged(nameof(BehaviorDisplayName));
         OnPropertyChanged(nameof(RequiresTemplate));
+        OnPropertyChanged(nameof(IsClickTemplate));
         OnPropertyChanged(nameof(IsWaitForTemplate));
         OnPropertyChanged(nameof(IsPressKey));
         OnPropertyChanged(nameof(IsDelay));

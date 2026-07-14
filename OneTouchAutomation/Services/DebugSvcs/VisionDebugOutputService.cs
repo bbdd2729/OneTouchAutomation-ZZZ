@@ -14,12 +14,13 @@ public class VisionDebugOutputService : IVisionDebugOutputService
         VisionDebugOutputRequest request,
         CancellationToken cancellationToken = default)
     {
-        var root = Path.Combine
-            (
-             Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-             "OneTouchAutomation",
-             "debug",
-             "vision");
+        var root = string.IsNullOrWhiteSpace(request.OutputDirectory)
+            ? Path.Combine(
+                Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+                "OneTouchAutomation",
+                "debug",
+                "vision")
+            : request.OutputDirectory;
 
         var dir = Path.Combine(root, DateTime.Now.ToString("yyyyMMdd-HHmmss"));
         Directory.CreateDirectory(dir);
@@ -54,6 +55,18 @@ public class VisionDebugOutputService : IVisionDebugOutputService
                  CapturedAt = request.Frame.CapturedAt,
                  request.TemplatePath,
                  request.Threshold,
+                 request.OutputDirectory,
+                 ClickOptions = request.ClickOptions is null
+                     ? null
+                     : new
+                     {
+                         request.ClickOptions.Mode,
+                         request.ClickOptions.OffsetX,
+                         request.ClickOptions.OffsetY,
+                         request.ClickOptions.RepeatCount,
+                         request.ClickOptions.IntervalMilliseconds,
+                         request.ClickOptions.HoldDurationMilliseconds
+                     },
                  request.Result.IsMatch,
                  request.Result.MatchScore,
                  MatchBounds = ToDto(request.Result.MatchBounds),

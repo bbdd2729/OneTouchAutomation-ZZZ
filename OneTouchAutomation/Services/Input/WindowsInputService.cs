@@ -34,21 +34,34 @@ public sealed class WindowsInputService : IInputService
         int screenY,
         CancellationToken cancellationToken = default)
     {
+        await ClickAsync(screenX, screenY, new MouseClickOptions(), cancellationToken);
+    }
+
+    public async Task ClickAsync
+    (
+        int screenX,
+        int screenY,
+        MouseClickOptions options,
+        CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(options);
         await MoveMouseAsync(screenX, screenY, cancellationToken);
 
-        mouse_event
-            (MouseEventLeftDown,
-             0,
-             0,
-             0,
-             UIntPtr.Zero);
-        await Task.Delay(60, cancellationToken);
-        mouse_event
-            (MouseEventLeftUp,
-             0,
-             0,
-             0,
-             UIntPtr.Zero);
+        var clickCount = GetClickCount(options);
+
+        for(var index = 0; index < clickCount; index++)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+
+            mouse_event(MouseEventLeftDown, 0, 0, 0, UIntPtr.Zero);
+            await Task.Delay(options.HoldDurationMilliseconds, cancellationToken);
+            mouse_event(MouseEventLeftUp, 0, 0, 0, UIntPtr.Zero);
+
+            if(index < clickCount - 1)
+            {
+                await Task.Delay(options.IntervalMilliseconds, cancellationToken);
+            }
+        }
     }
 
     public Task ClickMatchCenterAsync
@@ -57,17 +70,28 @@ public sealed class WindowsInputService : IInputService
         TemplateMatchResult result,
         CancellationToken cancellationToken = default)
     {
-        if (!result.IsMatch)
+        return ClickMatchAsync(frame, result, new MouseClickOptions(), cancellationToken);
+    }
+
+    public Task ClickMatchAsync
+    (
+        CapturedFrame frame,
+        TemplateMatchResult result,
+        MouseClickOptions options,
+        CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(options);
+
+        if(!result.IsMatch)
         {
             throw new InvalidOperationException("No match to click.");
         }
 
         var bounds = result.MatchBounds;
+        var screenX = frame.SourceX + bounds.X + bounds.Width / 2 + options.OffsetX;
+        var screenY = frame.SourceY + bounds.Y + bounds.Height / 2 + options.OffsetY;
 
-        var screenX = frame.SourceX + bounds.X + bounds.Width / 2;
-        var screenY = frame.SourceY + bounds.Y + bounds.Height / 2;
-
-        return ClickAsync(screenX, screenY, cancellationToken);
+        return ClickAsync(screenX, screenY, options, cancellationToken);
     }
 
     public async Task PressKeyAsync
@@ -106,4 +130,32 @@ public sealed class WindowsInputService : IInputService
         byte bScan,
         uint dwFlags,
         UIntPtr dwExtraInfo);
+
+    private static int GetClickCount(MouseClickOptions options)
+    {
+        if(!Enum.IsDefined(options.Mode))
+        {
+            throw new ArgumentOutOfRangeException(nameof(options.Mode));
+        }
+
+        if(options.HoldDurationMilliseconds < 1)
+        {
+            throw new ArgumentOutOfRangeException(nameof(options.HoldDurationMilliseconds));
+        }
+
+        if(options.IntervalMilliseconds < 1)
+        {
+            throw new ArgumentOutOfRangeException(nameof(options.IntervalMilliseconds));
+        }
+
+        return options.Mode switch
+        {
+            MouseClickMode.Single => 1,
+            MouseClickMode.Double => 2,
+            MouseClickMode.LongPress => 1,
+            MouseClickMode.Repeat when options.RepeatCount > 0 => options.RepeatCount,
+            MouseClickMode.Repeat => throw new ArgumentOutOfRangeException(nameof(options.RepeatCount)),
+            _ => throw new ArgumentOutOfRangeException(nameof(options.Mode))
+        };
+    }
 }

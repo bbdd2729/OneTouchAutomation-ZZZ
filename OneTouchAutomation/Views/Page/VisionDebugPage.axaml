@@ -83,6 +83,28 @@
                             Height="38"
                             Content="Capture Client"
                             Command="{Binding CaptureSelectedWindowClientCommand}" />
+
+                    <ComboBox Width="132"
+                              Height="38"
+                              Margin="0 0 8 8"
+                              ItemsSource="{Binding ContinuousCaptureSources}"
+                              SelectedItem="{Binding SelectedContinuousCaptureSource, Mode=TwoWay}" />
+
+                    <TextBox Width="80"
+                             Height="38"
+                             Margin="0 0 8 8"
+                             Text="{Binding CaptureFramesPerSecond, Mode=TwoWay}"
+                             PlaceholderText="FPS" />
+
+                    <Button Margin="0 0 8 8"
+                            Height="38"
+                            Content="Start Live"
+                            Command="{Binding StartContinuousCaptureCommand}" />
+
+                    <Button Margin="0 0 8 8"
+                            Height="38"
+                            Content="Stop Live"
+                            Command="{Binding StopContinuousCaptureCommand}" />
                 </WrapPanel>
             </Grid>
         </Border>
@@ -141,8 +163,8 @@
                                        Foreground="#F8FBFF" />
                             <WrapPanel>
                                 <Button Margin="0 0 8 8"
-                                        Content="Load Template"
-                                        Command="{Binding LoadTemplateCommand}" />
+                                        Content="Choose Template"
+                                        Click="SelectTemplateFile_Click" />
                                 <Button Margin="0 0 8 8"
                                         Content="Run Match"
                                         Command="{Binding RunMatchCommand}" />
@@ -158,8 +180,23 @@
                         <StackPanel Spacing="6">
                             <TextBlock Text="Template path"
                                        Foreground="#B8C7D8" />
-                            <TextBox Text="{Binding TemplatePath, Mode=TwoWay}"
-                                     PlaceholderText="C:\path\template.png" />
+                            <TextBox Text="{Binding TemplatePath}"
+                                     IsReadOnly="True"
+                                     PlaceholderText="Choose an image file" />
+                        </StackPanel>
+
+                        <StackPanel Spacing="6">
+                            <TextBlock Text="Debug output folder"
+                                       Foreground="#B8C7D8" />
+                            <Grid ColumnDefinitions="*,Auto"
+                                  ColumnSpacing="8">
+                                <TextBox Text="{Binding DebugOutputDirectory}"
+                                         IsReadOnly="True"
+                                         PlaceholderText="Default local debug folder" />
+                                <Button Grid.Column="1"
+                                        Content="Choose Folder"
+                                        Click="SelectOutputFolder_Click" />
+                            </Grid>
                         </StackPanel>
 
                         <StackPanel Spacing="6">
@@ -208,6 +245,36 @@
                                          Grid.Column="1"
                                          Text="{Binding RegionHeight, Mode=TwoWay}"
                                          PlaceholderText="Height" />
+                            </Grid>
+                        </StackPanel>
+
+                        <StackPanel Spacing="8">
+                            <TextBlock Text="Click options"
+                                       FontWeight="SemiBold"
+                                       Foreground="#F8FBFF" />
+                            <Grid ColumnDefinitions="*,*"
+                                  ColumnSpacing="8">
+                                <TextBox Text="{Binding ClickOffsetX, Mode=TwoWay}"
+                                         PlaceholderText="Offset X" />
+                                <TextBox Grid.Column="1"
+                                         Text="{Binding ClickOffsetY, Mode=TwoWay}"
+                                         PlaceholderText="Offset Y" />
+                            </Grid>
+                            <ComboBox ItemsSource="{Binding ClickModes}"
+                                      SelectedItem="{Binding ClickMode, Mode=TwoWay}" />
+                            <Grid ColumnDefinitions="*,*"
+                                  RowDefinitions="Auto,Auto"
+                                  ColumnSpacing="8"
+                                  RowSpacing="8">
+                                <TextBox Text="{Binding ClickRepeatCount, Mode=TwoWay}"
+                                         PlaceholderText="Repeat count" />
+                                <TextBox Grid.Column="1"
+                                         Text="{Binding ClickIntervalMilliseconds, Mode=TwoWay}"
+                                         PlaceholderText="Interval ms" />
+                                <TextBox Grid.Row="1"
+                                         Grid.ColumnSpan="2"
+                                         Text="{Binding ClickHoldDurationMilliseconds, Mode=TwoWay}"
+                                         PlaceholderText="Hold duration ms" />
                             </Grid>
                         </StackPanel>
 

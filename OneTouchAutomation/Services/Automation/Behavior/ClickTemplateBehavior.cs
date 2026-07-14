@@ -113,22 +113,33 @@ public class ClickTemplateBehavior : IAutomationBehavior<ClickTemplateBehaviorPa
 
         var bounds = matchResult.MatchBounds;
 
-        var screenX = frame.SourceX + bounds.X + bounds.Width / 2;
-        var screenY = frame.SourceY + bounds.Y + bounds.Height / 2;
+        var clickOptions = new MouseClickOptions
+        {
+            OffsetX = parameters.ClickOffsetX,
+            OffsetY = parameters.ClickOffsetY,
+            Mode = parameters.ClickMode,
+            RepeatCount = parameters.ClickRepeatCount,
+            IntervalMilliseconds = parameters.ClickIntervalMilliseconds,
+            HoldDurationMilliseconds = parameters.ClickHoldDurationMilliseconds
+        };
+
+        var screenX = frame.SourceX + bounds.X + bounds.Width / 2 + clickOptions.OffsetX;
+        var screenY = frame.SourceY + bounds.Y + bounds.Height / 2 + clickOptions.OffsetY;
 
         context.Log($"Matched: score={matchResult.MatchScore:0.000}, screen=({screenX},{screenY}).");
-        context.Log("Clicking match center.");
+        context.Log($"Clicking match with {clickOptions.Mode} mode.");
 
-        await _inputService.ClickMatchCenterAsync
+        await _inputService.ClickMatchAsync
                 (
                  frame,
                  matchResult,
+                 clickOptions,
                  cancellationToken);
 
         return new BehaviorExecutionResult
         {
                 IsSuccess  = true,
-                Message    = "Clicked template match center.",
+                Message    = "Clicked template match.",
                 MatchScore = matchResult.MatchScore,
                 ScreenX    = screenX,
                 ScreenY    = screenY

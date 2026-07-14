@@ -1,6 +1,9 @@
 ﻿using System.Collections.ObjectModel;
+using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Avalonia.Media.Imaging;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -14,11 +17,16 @@ namespace OneTouchAutomation.ViewModels;
 
 public partial class VisionDebugViewModel : ViewModelBase
 {
+    private CancellationTokenSource? _continuousCaptureCancellationSource;
     private TemplateMatchResult? _lastMatchResult;
 
-    [ObservableProperty] private CaptureWindowInfo? _selectedWindow;
+    [ObservableProperty]
+    [NotifyCanExecuteChangedFor(nameof(StartContinuousCaptureCommand))]
+    private CaptureWindowInfo? _selectedWindow;
 
-    [ObservableProperty] private string? _windowTitleKeyword;
+    [ObservableProperty]
+    [NotifyCanExecuteChangedFor(nameof(StartContinuousCaptureCommand))]
+    private string? _windowTitleKeyword;
 
     public ObservableCollection<string> Logs { get; } = new();
 
@@ -29,21 +37,27 @@ public partial class VisionDebugViewModel : ViewModelBase
 
     public VisionDebugViewModel
     (IScreenCaptureService screenCaptureService,
+     IContinuousCaptureService continuousCaptureService,
      IVisionDebugService visionDebugService,
      IVisionDebugOutputService visionDebugOutputService,
-     IInputService inputService)
+     IInputService inputService,
+     IWindowActivationService windowActivationService)
     {
         _screenCaptureService = screenCaptureService;
+        _continuousCaptureService = continuousCaptureService;
         _visionDebugService   = visionDebugService;
         _debugOutputService   = visionDebugOutputService;
         _inputService         = inputService;
+        _windowActivationService = windowActivationService;
     }
 
     public VisionDebugViewModel() : this
         (new ScreenCaptureService(),
+         new ContinuousCaptureService(new ScreenCaptureService()),
          new OpenCvVisionDebugService(),
          new VisionDebugOutputService(),
-         new WindowsInputService()) { }
+         new WindowsInputService(),
+         new WindowsWindowActivationService()) { }
 
     #endregion
 
@@ -69,14 +83,8 @@ public partial class VisionDebugViewModel : ViewModelBase
     [RelayCommand]
     private async Task CaptureScreenAsync()
     {
-        CurrentFrame = await _screenCaptureService.CaptureScreenAsync();
-
-        using var stream = new MemoryStream(CurrentFrame.PngBytes);
-        PreviewImage = new Bitmap(stream);
-
-        ScreenshotInfo =
-            $"{CurrentFrame.Width} x {CurrentFrame.Height} " +
-            $"- {CurrentFrame.SourceName} - {CurrentFrame.CapturedAt:HH:mm:ss}";
+        var frame = await _screenCaptureService.CaptureScreenAsync();
+        ShowFrame(frame);
         Logs.Insert(0, $"Captured screen: {ScreenshotInfo}");
     }
 
@@ -91,13 +99,8 @@ public partial class VisionDebugViewModel : ViewModelBase
 
         try
         {
-            CurrentFrame = await _screenCaptureService.CaptureWindowAsync(WindowTitleKeyword);
-
-            using var stream = new MemoryStream(CurrentFrame.PngBytes);
-            PreviewImage = new Bitmap(stream);
-
-            ScreenshotInfo =
-                $"{CurrentFrame.Width} x {CurrentFrame.Height} - {CurrentFrame.SourceName} - {CurrentFrame.CapturedAt:HH:mm:ss}";
+            var frame = await _screenCaptureService.CaptureWindowAsync(WindowTitleKeyword);
+            ShowFrame(frame);
 
             Logs.Insert(0, $"Captured window: {ScreenshotInfo}");
         }
@@ -119,13 +122,8 @@ public partial class VisionDebugViewModel : ViewModelBase
 
         try
         {
-            CurrentFrame = await _screenCaptureService.CaptureWindowAsync(SelectedWindow.Handle);
-
-            using var stream = new MemoryStream(CurrentFrame.PngBytes);
-            PreviewImage = new Bitmap(stream);
-
-            ScreenshotInfo =
-                $"{CurrentFrame.Width} x {CurrentFrame.Height} - {CurrentFrame.SourceName} - {CurrentFrame.CapturedAt:HH:mm:ss}";
+            var frame = await _screenCaptureService.CaptureWindowAsync(SelectedWindow.Handle);
+            ShowFrame(frame);
 
             Logs.Insert(0, $"Captured selected window: {ScreenshotInfo}");
         }
@@ -147,13 +145,8 @@ public partial class VisionDebugViewModel : ViewModelBase
 
         try
         {
-            CurrentFrame = await _screenCaptureService.CaptureWindowClientAsync(SelectedWindow.Handle);
-
-            using var stream = new MemoryStream(CurrentFrame.PngBytes);
-            PreviewImage = new Bitmap(stream);
-
-            ScreenshotInfo =
-                $"{CurrentFrame.Width} x {CurrentFrame.Height} - {CurrentFrame.SourceName} - {CurrentFrame.CapturedAt:HH:mm:ss}";
+            var frame = await _screenCaptureService.CaptureWindowClientAsync(SelectedWindow.Handle);
+            ShowFrame(frame);
 
             Logs.Insert(0, $"Captured selected window client: {ScreenshotInfo}");
         }
@@ -164,21 +157,24 @@ public partial class VisionDebugViewModel : ViewModelBase
         }
     }
 
+    [RelayCommand(CanExecute = nameof(CanStartContinuousCapture))]
+    private void StartContinuousCapture()
+    {
+        _continuousCaptureCancellationSource = new CancellationTokenSource();
+        IsContinuousCapturing = true;
+        _ = CaptureContinuouslyAsync(_continuousCaptureCancellationSource);
+    }
+
+    [RelayCommand(CanExecute = nameof(CanStopContinuousCapture))]
+    private void StopContinuousCapture()
+    {
+        _continuousCaptureCancellationSource?.Cancel();
+    }
+
     [RelayCommand]
     private async Task LoadTemplateAsync()
     {
-        if (string.IsNullOrWhiteSpace(TemplatePath) || !File.Exists(TemplatePath))
-        {
-            MatchResultText = "Template file not found.";
-            return;
-        }
-
-        TemplateBytes = await File.ReadAllBytesAsync(TemplatePath);
-
-        using var stream = new MemoryStream(TemplateBytes);
-        TemplateImage = new Bitmap(stream);
-
-        Logs.Insert(0, $"Loaded template: {TemplatePath}");
+        await LoadTemplateFromPathAsync(TemplatePath);
     }
 
     [RelayCommand]
@@ -243,12 +239,18 @@ public partial class VisionDebugViewModel : ViewModelBase
 
         var bounds = _lastMatchResult.MatchBounds;
 
-        var screenX = CurrentFrame.SourceX + bounds.X + bounds.Width / 2;
-        var screenY = CurrentFrame.SourceY + bounds.Y + bounds.Height / 2;
+        var clickOptions = CreateClickOptions();
+        var screenX = CurrentFrame.SourceX + bounds.X + bounds.Width / 2 + clickOptions.OffsetX;
+        var screenY = CurrentFrame.SourceY + bounds.Y + bounds.Height / 2 + clickOptions.OffsetY;
 
         try
         {
-            await _inputService.ClickMatchCenterAsync(CurrentFrame, _lastMatchResult);
+            if(SelectedWindow is not null)
+            {
+                await _windowActivationService.ActivateAsync(SelectedWindow.Handle);
+            }
+
+            await _inputService.ClickMatchAsync(CurrentFrame, _lastMatchResult, clickOptions);
 
             Logs.Insert
                 (
@@ -290,6 +292,8 @@ public partial class VisionDebugViewModel : ViewModelBase
                 TemplateBytes = TemplateBytes,
                 TemplatePath  = TemplatePath,
                 Threshold     = Threshold,
+                OutputDirectory = DebugOutputDirectory,
+                ClickOptions = CreateClickOptions(),
                 Result        = _lastMatchResult,
                 Logs          = Logs.ToArray()
             });
@@ -303,11 +307,15 @@ public partial class VisionDebugViewModel : ViewModelBase
 
     private readonly IVisionDebugOutputService _debugOutputService;
 
+    private readonly IContinuousCaptureService _continuousCaptureService;
+
     private readonly IScreenCaptureService _screenCaptureService;
 
     private readonly IVisionDebugService _visionDebugService;
 
     private readonly IInputService _inputService;
+
+    private readonly IWindowActivationService _windowActivationService;
 
     #endregion
 
@@ -320,6 +328,36 @@ public partial class VisionDebugViewModel : ViewModelBase
     [ObservableProperty] private Bitmap? _previewImage;
 
     [ObservableProperty] private string _screenshotInfo = "No screenshot";
+
+    [ObservableProperty] private string? _debugOutputDirectory;
+
+    [ObservableProperty]
+    [NotifyCanExecuteChangedFor(nameof(StartContinuousCaptureCommand))]
+    private ContinuousCaptureSource _selectedContinuousCaptureSource = ContinuousCaptureSource.WindowClient;
+
+    public IReadOnlyList<ContinuousCaptureSource> ContinuousCaptureSources { get; } =
+        Enum.GetValues<ContinuousCaptureSource>();
+
+    [ObservableProperty] private int _captureFramesPerSecond = 20;
+
+    [ObservableProperty]
+    [NotifyCanExecuteChangedFor(nameof(StartContinuousCaptureCommand))]
+    [NotifyCanExecuteChangedFor(nameof(StopContinuousCaptureCommand))]
+    private bool _isContinuousCapturing;
+
+    [ObservableProperty] private int _clickOffsetX;
+
+    [ObservableProperty] private int _clickOffsetY;
+
+    [ObservableProperty] private MouseClickMode _clickMode = MouseClickMode.Single;
+
+    public IReadOnlyList<MouseClickMode> ClickModes { get; } = Enum.GetValues<MouseClickMode>();
+
+    [ObservableProperty] private int _clickRepeatCount = 1;
+
+    [ObservableProperty] private int _clickIntervalMilliseconds = 100;
+
+    [ObservableProperty] private int _clickHoldDurationMilliseconds = 60;
 
     [ObservableProperty] private byte[]? _templateBytes;
 
@@ -344,4 +382,104 @@ public partial class VisionDebugViewModel : ViewModelBase
     [ObservableProperty] private int _regionHeight = 300;
 
     #endregion
+
+    public async Task LoadTemplateFromPathAsync(string? templatePath)
+    {
+        if(string.IsNullOrWhiteSpace(templatePath) || !File.Exists(templatePath))
+        {
+            MatchResultText = "Template file not found.";
+            return;
+        }
+
+        TemplatePath = templatePath;
+        TemplateBytes = await File.ReadAllBytesAsync(templatePath);
+
+        using var stream = new MemoryStream(TemplateBytes);
+        TemplateImage = new Bitmap(stream);
+
+        Logs.Insert(0, $"Loaded template: {TemplatePath}");
+    }
+
+    public void SetDebugOutputDirectory(string directory)
+    {
+        DebugOutputDirectory = directory;
+    }
+
+    private MouseClickOptions CreateClickOptions()
+    {
+        return new MouseClickOptions
+        {
+            OffsetX = ClickOffsetX,
+            OffsetY = ClickOffsetY,
+            Mode = ClickMode,
+            RepeatCount = ClickRepeatCount,
+            IntervalMilliseconds = ClickIntervalMilliseconds,
+            HoldDurationMilliseconds = ClickHoldDurationMilliseconds
+        };
+    }
+
+    private async Task CaptureContinuouslyAsync(CancellationTokenSource cancellationSource)
+    {
+        try
+        {
+            var request = new ContinuousCaptureRequest
+            {
+                Source = SelectedContinuousCaptureSource,
+                WindowHandle = SelectedWindow?.Handle ?? IntPtr.Zero,
+                WindowTitleKeyword = WindowTitleKeyword,
+                FramesPerSecond = CaptureFramesPerSecond
+            };
+
+            await foreach(var frame in _continuousCaptureService.CaptureFramesAsync(
+                              request,
+                              cancellationSource.Token))
+            {
+                ShowFrame(frame, isContinuous: true);
+            }
+        }
+        catch(OperationCanceledException) when(cancellationSource.IsCancellationRequested)
+        {
+            Logs.Insert(0, "Continuous capture stopped.");
+        }
+        catch(Exception exception)
+        {
+            MatchResultText = exception.Message;
+            Logs.Insert(0, $"Continuous capture failed: {exception.Message}");
+        }
+        finally
+        {
+            if(ReferenceEquals(_continuousCaptureCancellationSource, cancellationSource))
+            {
+                _continuousCaptureCancellationSource = null;
+                IsContinuousCapturing = false;
+            }
+
+            cancellationSource.Dispose();
+        }
+    }
+
+    private bool CanStartContinuousCapture()
+    {
+        return !IsContinuousCapturing
+            && (SelectedContinuousCaptureSource == ContinuousCaptureSource.Screen
+                || SelectedWindow is not null
+                || (SelectedContinuousCaptureSource == ContinuousCaptureSource.Window
+                    && !string.IsNullOrWhiteSpace(WindowTitleKeyword)));
+    }
+
+    private bool CanStopContinuousCapture()
+    {
+        return IsContinuousCapturing;
+    }
+
+    private void ShowFrame(CapturedFrame frame, bool isContinuous = false)
+    {
+        CurrentFrame = frame;
+
+        using var stream = new MemoryStream(frame.PngBytes);
+        PreviewImage = new Bitmap(stream);
+        ScreenshotInfo =
+            $"{frame.Width} x {frame.Height} - {frame.SourceName} - {frame.CapturedAt:HH:mm:ss}" +
+            (isContinuous ? $" - Live {CaptureFramesPerSecond} FPS" : string.Empty);
+    }
 }

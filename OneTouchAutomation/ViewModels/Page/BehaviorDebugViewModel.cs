@@ -43,9 +43,23 @@ public partial class BehaviorDebugViewModel : ViewModelBase
 
     [ObservableProperty] private int _delayMilliseconds = 500;
 
+    [ObservableProperty] private int _clickOffsetX;
+
+    [ObservableProperty] private int _clickOffsetY;
+
+    [ObservableProperty] private MouseClickMode _clickMode = MouseClickMode.Single;
+
+    [ObservableProperty] private int _clickRepeatCount = 1;
+
+    [ObservableProperty] private int _clickIntervalMilliseconds = 100;
+
+    [ObservableProperty] private int _clickHoldDurationMilliseconds = 60;
+
     [ObservableProperty] private bool _requiresTemplate = true;
 
     [ObservableProperty] private bool _isWaitForTemplate;
+
+    [ObservableProperty] private bool _isClickTemplate = true;
 
     [ObservableProperty] private bool _isPressKey;
 
@@ -176,7 +190,13 @@ public partial class BehaviorDebugViewModel : ViewModelBase
             RegionX = RegionX,
             RegionY = RegionY,
             RegionWidth = RegionWidth,
-            RegionHeight = RegionHeight
+            RegionHeight = RegionHeight,
+            ClickOffsetX = ClickOffsetX,
+            ClickOffsetY = ClickOffsetY,
+            ClickMode = ClickMode,
+            ClickRepeatCount = ClickRepeatCount,
+            ClickIntervalMilliseconds = ClickIntervalMilliseconds,
+            ClickHoldDurationMilliseconds = ClickHoldDurationMilliseconds
         };
     }
 
@@ -197,11 +217,14 @@ public partial class BehaviorDebugViewModel : ViewModelBase
 
     public IReadOnlyList<AutomationKey> AvailableKeys { get; } = Enum.GetValues<AutomationKey>();
 
+    public IReadOnlyList<MouseClickMode> AvailableClickModes { get; } = Enum.GetValues<MouseClickMode>();
+
     partial void OnSelectedBehaviorChanged(IAutomationBehavior? value)
     {
         var behaviorId = value?.Id;
         RequiresTemplate = behaviorId is "click-template" or "wait-for-template";
         IsWaitForTemplate = behaviorId == "wait-for-template";
+        IsClickTemplate = behaviorId == "click-template";
         IsPressKey = behaviorId == "press-key";
         IsDelay = behaviorId == "delay";
     }
