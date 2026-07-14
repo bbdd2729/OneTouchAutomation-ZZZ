@@ -2,8 +2,8 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-             xmlns:constants="clr-namespace:OneTouchAutomation.Constants"
              xmlns:viewModels="clr-namespace:OneTouchAutomation.ViewModels"
+             xmlns:fui="clr-namespace:AvaloniaFluentUI.Controls;assembly=AvaloniaFluentUI"
              mc:Ignorable="d"
              d:DesignWidth="1000"
              d:DesignHeight="650"
@@ -17,9 +17,9 @@
           RowDefinitions="Auto,*,150"
           RowSpacing="14">
         <Border Padding="16"
-                BorderBrush="#24FFFFFF"
+                BorderBrush="{DynamicResource ControlStrokeColorDefault}"
                 BorderThickness="1"
-                Background="#1CFFFFFF"
+                Background="{DynamicResource ControlFillColorDefaultBrush}"
                 CornerRadius="8">
             <Grid RowDefinitions="Auto,Auto"
                   RowSpacing="12">
@@ -27,44 +27,47 @@
                     <TextBlock Text="Vision Debug"
                                FontSize="18"
                                FontWeight="SemiBold"
-                               Foreground="#F8FBFF" />
+                               Foreground="{DynamicResource TextFillColorPrimaryBrush}" />
                     <TextBlock Text="Capture a target, adjust matching parameters, then inspect the result."
                                FontSize="12"
-                               Foreground="#B8C7D8" />
+                               Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
                 </StackPanel>
 
-                <WrapPanel Grid.Row="1">
-                    <Button Margin="0 0 8 8"
-                            Height="38"
-                            Content="Capture Screen"
-                            Command="{Binding CaptureScreenCommand}" />
+                <Grid Grid.Row="1"
+                      RowDefinitions="Auto,Auto"
+                      RowSpacing="8">
+                    <fui:CommandBar DefaultLabelPosition="Right">
+                        <fui:CommandBar.PrimaryCommands>
+                            <fui:CommandBarButton Label="Capture Screen"
+                                                  Command="{Binding CaptureScreenCommand}" />
+                            <fui:CommandBarButton Label="Capture by Title"
+                                                  Command="{Binding CaptureWindowCommand}" />
+                            <fui:CommandBarButton Label="Capture Window"
+                                                  Command="{Binding CaptureSelectedWindowCommand}" />
+                            <fui:CommandBarButton Label="Start Live"
+                                                  Command="{Binding StartContinuousCaptureCommand}" />
+                        </fui:CommandBar.PrimaryCommands>
+                        <fui:CommandBar.SecondaryCommands>
+                            <fui:CommandBarButton IconSource="Refresh"
+                                                  Label="Refresh Windows"
+                                                  Command="{Binding RefreshWindowsCommand}" />
+                            <fui:CommandBarButton Label="Capture Client"
+                                                  Command="{Binding CaptureSelectedWindowClientCommand}" />
+                            <fui:CommandBarButton Label="Stop Live"
+                                                  Command="{Binding StopContinuousCaptureCommand}" />
+                        </fui:CommandBar.SecondaryCommands>
+                    </fui:CommandBar>
 
+                    <WrapPanel Grid.Row="1">
                     <TextBox Width="180"
                              Height="38"
-                             Margin="0 0 8 8"
+                             Margin="0 0 8 0"
                              Text="{Binding WindowTitleKeyword, Mode=TwoWay}"
                              PlaceholderText="Window title" />
 
-                    <Button Margin="0 0 8 8"
-                            Height="38"
-                            Content="Capture by Title"
-                            Command="{Binding CaptureWindowCommand}" />
-
-                    <Button Width="34"
-                            Height="38"
-                            Margin="0 0 8 8"
-                            Padding="0"
-                            Command="{Binding RefreshWindowsCommand}"
-                            ToolTip.Tip="Refresh windows">
-                        <TextBlock Classes="Icon"
-                                   Text="{x:Static constants:Icon.Refresh}"
-                                   HorizontalAlignment="Center"
-                                   VerticalAlignment="Center" />
-                    </Button>
-
                     <ComboBox Width="250"
                               Height="38"
-                              Margin="0 0 8 8"
+                              Margin="0 0 8 0"
                               ItemsSource="{Binding Windows}"
                               SelectedItem="{Binding SelectedWindow, Mode=TwoWay}">
                         <ComboBox.ItemTemplate>
@@ -74,38 +77,22 @@
                         </ComboBox.ItemTemplate>
                     </ComboBox>
 
-                    <Button Margin="0 0 8 8"
-                            Height="38"
-                            Content="Capture Window"
-                            Command="{Binding CaptureSelectedWindowCommand}" />
-
-                    <Button Margin="0 0 8 8"
-                            Height="38"
-                            Content="Capture Client"
-                            Command="{Binding CaptureSelectedWindowClientCommand}" />
-
                     <ComboBox Width="132"
                               Height="38"
-                              Margin="0 0 8 8"
+                              Margin="0 0 8 0"
                               ItemsSource="{Binding ContinuousCaptureSources}"
                               SelectedItem="{Binding SelectedContinuousCaptureSource, Mode=TwoWay}" />
 
-                    <TextBox Width="80"
-                             Height="38"
-                             Margin="0 0 8 8"
-                             Text="{Binding CaptureFramesPerSecond, Mode=TwoWay}"
-                             PlaceholderText="FPS" />
+                    <fui:NumberBox Width="100"
+                                   Height="38"
+                                   Margin="0 0 8 0"
+                                   Value="{Binding CaptureFramesPerSecond, Mode=TwoWay}"
+                                   Minimum="1"
+                                   Maximum="60"
+                                   SpinButtonPlacementMode="Inline" />
 
-                    <Button Margin="0 0 8 8"
-                            Height="38"
-                            Content="Start Live"
-                            Command="{Binding StartContinuousCaptureCommand}" />
-
-                    <Button Margin="0 0 8 8"
-                            Height="38"
-                            Content="Stop Live"
-                            Command="{Binding StopContinuousCaptureCommand}" />
-                </WrapPanel>
+                    </WrapPanel>
+                </Grid>
             </Grid>
         </Border>
 
@@ -113,9 +100,9 @@
               ColumnDefinitions="*,360"
               ColumnSpacing="14"
               MinHeight="260">
-            <Border BorderBrush="#24FFFFFF"
+            <Border BorderBrush="{DynamicResource ControlStrokeColorDefault}"
                     BorderThickness="1"
-                    Background="#14000000"
+                    Background="{DynamicResource ControlFillColorTertiaryBrush}"
                     CornerRadius="8">
                 <Grid RowDefinitions="Auto,*">
                     <Grid Margin="16 14 16 10"
@@ -123,10 +110,10 @@
                         <StackPanel Spacing="3">
                             <TextBlock Text="Preview"
                                        FontWeight="SemiBold"
-                                       Foreground="#F8FBFF" />
+                                       Foreground="{DynamicResource TextFillColorPrimaryBrush}" />
                             <TextBlock Text="{Binding ScreenshotInfo}"
                                        FontSize="12"
-                                       Foreground="#B8C7D8"
+                                       Foreground="{DynamicResource TextFillColorSecondaryBrush}"
                                        TextTrimming="CharacterEllipsis" />
                         </StackPanel>
                         <TextBlock Grid.Column="1"
@@ -134,52 +121,54 @@
                                    MaxWidth="260"
                                    VerticalAlignment="Center"
                                    FontSize="12"
-                                   Foreground="#B8C7D8"
+                                   Foreground="{DynamicResource TextFillColorSecondaryBrush}"
                                    TextTrimming="CharacterEllipsis" />
                     </Grid>
 
-                    <ScrollViewer Grid.Row="1"
+                    <fui:SmoothScrollViewer Grid.Row="1"
                                   Margin="12 0 12 12"
                                   HorizontalScrollBarVisibility="Auto"
                                   VerticalScrollBarVisibility="Auto">
                         <Image Source="{Binding PreviewImage}"
                                Stretch="Uniform" />
-                    </ScrollViewer>
+                    </fui:SmoothScrollViewer>
                 </Grid>
             </Border>
 
             <Border Grid.Column="1"
                     Padding="16"
-                    BorderBrush="#24FFFFFF"
+                    BorderBrush="{DynamicResource ControlStrokeColorDefault}"
                     BorderThickness="1"
-                    Background="#1CFFFFFF"
+                    Background="{DynamicResource ControlFillColorDefaultBrush}"
                     CornerRadius="8">
-                <ScrollViewer HorizontalScrollBarVisibility="Disabled"
+                <fui:SmoothScrollViewer HorizontalScrollBarVisibility="Disabled"
                               VerticalScrollBarVisibility="Auto">
                     <StackPanel Spacing="18">
                         <StackPanel Spacing="8">
                             <TextBlock Text="Template Matching"
                                        FontWeight="SemiBold"
-                                       Foreground="#F8FBFF" />
-                            <WrapPanel>
-                                <Button Margin="0 0 8 8"
-                                        Content="Choose Template"
-                                        Click="SelectTemplateFile_Click" />
-                                <Button Margin="0 0 8 8"
-                                        Content="Run Match"
-                                        Command="{Binding RunMatchCommand}" />
-                                <Button Margin="0 0 8 8"
-                                        Content="Click Best"
-                                        Command="{Binding ClickBestMatchCommand}" />
-                                <Button Margin="0 0 8 8"
-                                        Content="Save Output"
-                                        Command="{Binding SaveDebugOutputCommand}" />
-                            </WrapPanel>
+                                       Foreground="{DynamicResource TextFillColorPrimaryBrush}" />
+                            <fui:CommandBar DefaultLabelPosition="Right">
+                                <fui:CommandBar.PrimaryCommands>
+                                    <fui:CommandBarButton IconSource="Add"
+                                                          Label="Choose Template"
+                                                          Click="SelectTemplateFile_Click" />
+                                    <fui:CommandBarButton Label="Run Match"
+                                                          Command="{Binding RunMatchCommand}" />
+                                    <fui:CommandBarButton Label="Click Best"
+                                                          Command="{Binding ClickBestMatchCommand}" />
+                                </fui:CommandBar.PrimaryCommands>
+                                <fui:CommandBar.SecondaryCommands>
+                                    <fui:CommandBarButton IconSource="Save"
+                                                          Label="Save Output"
+                                                          Command="{Binding SaveDebugOutputCommand}" />
+                                </fui:CommandBar.SecondaryCommands>
+                            </fui:CommandBar>
                         </StackPanel>
 
                         <StackPanel Spacing="6">
                             <TextBlock Text="Template path"
-                                       Foreground="#B8C7D8" />
+                                       Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
                             <TextBox Text="{Binding TemplatePath}"
                                      IsReadOnly="True"
                                      PlaceholderText="Choose an image file" />
@@ -187,7 +176,7 @@
 
                         <StackPanel Spacing="6">
                             <TextBlock Text="Debug output folder"
-                                       Foreground="#B8C7D8" />
+                                       Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
                             <Grid ColumnDefinitions="*,Auto"
                                   ColumnSpacing="8">
                                 <TextBox Text="{Binding DebugOutputDirectory}"
@@ -201,11 +190,11 @@
 
                         <StackPanel Spacing="6">
                             <TextBlock Text="Template preview"
-                                       Foreground="#B8C7D8" />
+                                       Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
                             <Border Height="132"
-                                    BorderBrush="#24FFFFFF"
+                                    BorderBrush="{DynamicResource ControlStrokeColorDefault}"
                                     BorderThickness="1"
-                                    Background="#10000000"
+                                    Background="{DynamicResource ControlFillColorTertiaryBrush}"
                                     CornerRadius="6">
                                 <Image Source="{Binding TemplateImage}"
                                        Stretch="Uniform" />
@@ -215,10 +204,10 @@
                         <StackPanel Spacing="8">
                             <Grid ColumnDefinitions="*,Auto">
                                 <TextBlock Text="Threshold"
-                                           Foreground="#F8FBFF" />
+                                           Foreground="{DynamicResource TextFillColorPrimaryBrush}" />
                                 <TextBlock Grid.Column="1"
                                            Text="{Binding Threshold, StringFormat={}{0:0.00}}"
-                                           Foreground="#B8C7D8" />
+                                           Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
                             </Grid>
                             <Slider Minimum="0.5"
                                     Maximum="0.99"
@@ -233,32 +222,21 @@
                                   RowDefinitions="Auto,Auto"
                                   ColumnSpacing="8"
                                   RowSpacing="8">
-                                <TextBox Text="{Binding RegionX, Mode=TwoWay}"
-                                         PlaceholderText="X" />
-                                <TextBox Grid.Column="1"
-                                         Text="{Binding RegionY, Mode=TwoWay}"
-                                         PlaceholderText="Y" />
-                                <TextBox Grid.Row="1"
-                                         Text="{Binding RegionWidth, Mode=TwoWay}"
-                                         PlaceholderText="Width" />
-                                <TextBox Grid.Row="1"
-                                         Grid.Column="1"
-                                         Text="{Binding RegionHeight, Mode=TwoWay}"
-                                         PlaceholderText="Height" />
+                                <fui:NumberBox Value="{Binding RegionX, Mode=TwoWay}" SpinButtonPlacementMode="Inline" />
+                                <fui:NumberBox Grid.Column="1" Value="{Binding RegionY, Mode=TwoWay}" SpinButtonPlacementMode="Inline" />
+                                <fui:NumberBox Grid.Row="1" Value="{Binding RegionWidth, Mode=TwoWay}" Minimum="1" SpinButtonPlacementMode="Inline" />
+                                <fui:NumberBox Grid.Row="1" Grid.Column="1" Value="{Binding RegionHeight, Mode=TwoWay}" Minimum="1" SpinButtonPlacementMode="Inline" />
                             </Grid>
                         </StackPanel>
 
                         <StackPanel Spacing="8">
                             <TextBlock Text="Click options"
                                        FontWeight="SemiBold"
-                                       Foreground="#F8FBFF" />
+                                       Foreground="{DynamicResource TextFillColorPrimaryBrush}" />
                             <Grid ColumnDefinitions="*,*"
                                   ColumnSpacing="8">
-                                <TextBox Text="{Binding ClickOffsetX, Mode=TwoWay}"
-                                         PlaceholderText="Offset X" />
-                                <TextBox Grid.Column="1"
-                                         Text="{Binding ClickOffsetY, Mode=TwoWay}"
-                                         PlaceholderText="Offset Y" />
+                                <fui:NumberBox Value="{Binding ClickOffsetX, Mode=TwoWay}" SpinButtonPlacementMode="Inline" />
+                                <fui:NumberBox Grid.Column="1" Value="{Binding ClickOffsetY, Mode=TwoWay}" SpinButtonPlacementMode="Inline" />
                             </Grid>
                             <ComboBox ItemsSource="{Binding ClickModes}"
                                       SelectedItem="{Binding ClickMode, Mode=TwoWay}" />
@@ -266,43 +244,37 @@
                                   RowDefinitions="Auto,Auto"
                                   ColumnSpacing="8"
                                   RowSpacing="8">
-                                <TextBox Text="{Binding ClickRepeatCount, Mode=TwoWay}"
-                                         PlaceholderText="Repeat count" />
-                                <TextBox Grid.Column="1"
-                                         Text="{Binding ClickIntervalMilliseconds, Mode=TwoWay}"
-                                         PlaceholderText="Interval ms" />
-                                <TextBox Grid.Row="1"
-                                         Grid.ColumnSpan="2"
-                                         Text="{Binding ClickHoldDurationMilliseconds, Mode=TwoWay}"
-                                         PlaceholderText="Hold duration ms" />
+                                <fui:NumberBox Value="{Binding ClickRepeatCount, Mode=TwoWay}" Minimum="1" SpinButtonPlacementMode="Inline" />
+                                <fui:NumberBox Grid.Column="1" Value="{Binding ClickIntervalMilliseconds, Mode=TwoWay}" Minimum="1" SpinButtonPlacementMode="Inline" />
+                                <fui:NumberBox Grid.Row="1" Grid.ColumnSpan="2" Value="{Binding ClickHoldDurationMilliseconds, Mode=TwoWay}" Minimum="1" SpinButtonPlacementMode="Inline" />
                             </Grid>
                         </StackPanel>
 
                         <StackPanel Spacing="6">
                             <TextBlock Text="Result"
                                        FontWeight="SemiBold"
-                                       Foreground="#F8FBFF" />
+                                       Foreground="{DynamicResource TextFillColorPrimaryBrush}" />
                             <TextBlock Text="{Binding MatchResultText}"
-                                       Foreground="#B8C7D8"
+                                       Foreground="{DynamicResource TextFillColorSecondaryBrush}"
                                        TextWrapping="Wrap" />
                         </StackPanel>
                     </StackPanel>
-                </ScrollViewer>
+                </fui:SmoothScrollViewer>
             </Border>
         </Grid>
 
         <Border Grid.Row="2"
                 Padding="12"
-                BorderBrush="#24FFFFFF"
+                BorderBrush="{DynamicResource ControlStrokeColorDefault}"
                 BorderThickness="1"
-                Background="#14000000"
+                Background="{DynamicResource ControlFillColorTertiaryBrush}"
                 CornerRadius="8">
             <Grid RowDefinitions="Auto,*"
                   RowSpacing="8">
                 <TextBlock Text="Activity"
                            FontWeight="SemiBold"
-                           Foreground="#F8FBFF" />
-                <ScrollViewer Grid.Row="1"
+                           Foreground="{DynamicResource TextFillColorPrimaryBrush}" />
+                <fui:SmoothScrollViewer Grid.Row="1"
                               HorizontalScrollBarVisibility="Disabled"
                               VerticalScrollBarVisibility="Auto">
                     <ItemsControl ItemsSource="{Binding Logs}">
@@ -310,12 +282,12 @@
                             <DataTemplate>
                                 <TextBlock Text="{Binding}"
                                            FontSize="12"
-                                           Foreground="#B8C7D8"
+                                           Foreground="{DynamicResource TextFillColorSecondaryBrush}"
                                            TextWrapping="Wrap" />
                             </DataTemplate>
                         </ItemsControl.ItemTemplate>
                     </ItemsControl>
-                </ScrollViewer>
+                </fui:SmoothScrollViewer>
             </Grid>
         </Border>
     </Grid>
