@@ -105,7 +105,8 @@ public class ClickTemplateBehavior : IAutomationBehavior<ClickTemplateBehaviorPa
         {
             return new BehaviorExecutionResult
             {
-                    IsSuccess  = false,
+                    IsSuccess  = !parameters.FailWhenNotFound,
+                    StatusCode = "not-found",
                     Message    = matchResult.Message,
                     MatchScore = matchResult.MatchScore
             };
@@ -139,6 +140,7 @@ public class ClickTemplateBehavior : IAutomationBehavior<ClickTemplateBehaviorPa
         return new BehaviorExecutionResult
         {
                 IsSuccess  = true,
+                StatusCode = "clicked",
                 Message    = "Clicked template match.",
                 MatchScore = matchResult.MatchScore,
                 ScreenX    = screenX,

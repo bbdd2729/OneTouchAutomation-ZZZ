@@ -30,6 +30,13 @@ public partial class MainWindowViewModel : ViewModelBase
 
         new SideBarItemModel()
         {
+            ModelType = typeof(WorkflowPageViewModel),
+            IconKey   = Icon.Workflow,
+            Title     = "Workflows"
+        },
+
+        new SideBarItemModel()
+        {
             ModelType = typeof(DebugPageViewModel),
             IconKey   = Icon.Debug,
             Title     = "Debug"

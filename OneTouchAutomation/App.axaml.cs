@@ -72,6 +72,7 @@ public class App : Application
                         "OneTouchAutomation.Services.Capture",
                         "OneTouchAutomation.Services.Automation.History",
                         "OneTouchAutomation.Services.Automation.Persistence",
+                        "OneTouchAutomation.Services.Automation.Daily",
                         "OneTouchAutomation.Services.Automation.Workflows",
                         "OneTouchAutomation.Services.Vision",
                                                 "OneTouchAutomation.Services.Debug",
@@ -87,6 +88,11 @@ public class App : Application
             (provider => provider.GetRequiredService<WaitForTemplateBehavior>());
         services.AddSingleton<IAutomationBehavior>
             (provider => provider.GetRequiredService<WaitForTemplateBehavior>());
+        services.AddSingleton<WaitForTemplateDisappearBehavior>();
+        services.AddSingleton<IAutomationBehavior<WaitForTemplateDisappearBehaviorParameters>>
+            (provider => provider.GetRequiredService<WaitForTemplateDisappearBehavior>());
+        services.AddSingleton<IAutomationBehavior>
+            (provider => provider.GetRequiredService<WaitForTemplateDisappearBehavior>());
         services.AddSingleton<PressKeyBehavior>();
         services.AddSingleton<IAutomationBehavior<PressKeyBehaviorParameters>>
             (provider => provider.GetRequiredService<PressKeyBehavior>());
@@ -102,6 +108,21 @@ public class App : Application
             (provider => provider.GetRequiredService<RunWorkflowBehavior>());
         services.AddSingleton<IAutomationBehavior>
             (provider => provider.GetRequiredService<RunWorkflowBehavior>());
+        services.AddSingleton<RunDailyWorkflowBehavior>();
+        services.AddSingleton<IAutomationBehavior<RunDailyWorkflowBehaviorParameters>>
+            (provider => provider.GetRequiredService<RunDailyWorkflowBehavior>());
+        services.AddSingleton<IAutomationBehavior>
+            (provider => provider.GetRequiredService<RunDailyWorkflowBehavior>());
+        services.AddSingleton<CheckScreenBehavior>();
+        services.AddSingleton<IAutomationBehavior<CheckScreenBehaviorParameters>>
+            (provider => provider.GetRequiredService<CheckScreenBehavior>());
+        services.AddSingleton<IAutomationBehavior>
+            (provider => provider.GetRequiredService<CheckScreenBehavior>());
+        services.AddSingleton<WaitForScreenBehavior>();
+        services.AddSingleton<IAutomationBehavior<WaitForScreenBehaviorParameters>>
+            (provider => provider.GetRequiredService<WaitForScreenBehavior>());
+        services.AddSingleton<IAutomationBehavior>
+            (provider => provider.GetRequiredService<WaitForScreenBehavior>());
         services.AddSingleton<IBehaviorRegistry, BehaviorRegistry>();
         services.AddSingleton<ITaskRunner, TaskRunner>();
     }

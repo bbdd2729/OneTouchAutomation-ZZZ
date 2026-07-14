@@ -261,7 +261,7 @@ public sealed class WorkflowRunner : IWorkflowRunner
             Duration = stopwatch.Elapsed,
             AttemptCount = attempts,
             Outcome = behaviorResult.IsSuccess ? WorkflowNodeOutcome.Success : WorkflowNodeOutcome.Failure,
-            Status = behaviorResult.Message
+            Status = behaviorResult.StatusCode ?? behaviorResult.Message
         };
     }
 

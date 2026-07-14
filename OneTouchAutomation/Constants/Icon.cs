@@ -11,4 +11,5 @@ public static class Icon
     public const string Debug      = "\uEBE8";
     public const string Vision     = "\uF19D";
     public const string Behavior   = "\uF271";
+    public const string Workflow   = "\uF5B0";
 }

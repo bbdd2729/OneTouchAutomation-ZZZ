@@ -6,6 +6,9 @@ public sealed class BehaviorExecutionResult
 
     public required string Message { get; init; }
 
+    // Stable machine-readable outcome used by workflow transitions.
+    public string? StatusCode { get; init; }
+
     public double MatchScore { get; init; }
 
     public int? ScreenX { get; init; }

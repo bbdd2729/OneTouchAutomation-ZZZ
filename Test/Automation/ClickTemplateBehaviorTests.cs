@@ -122,6 +122,47 @@ public class ClickTemplateBehaviorTests
         }
     }
 
+    [Fact]
+    public async Task ExecuteAsync_ReturnsSuccessWithNotFoundStatus_WhenOptionalTemplateDoesNotMatch()
+    {
+        var templatePath = await CreateTemplateFileAsync();
+        try
+        {
+            var behavior = new ClickTemplateBehavior(
+                new StubScreenCaptureService
+                {
+                    Frame = new CapturedFrame
+                    {
+                        PngBytes = [1],
+                        Width = 1,
+                        Height = 1,
+                        CapturedAt = DateTimeOffset.UtcNow
+                    }
+                },
+                new StubVisionDebugService
+                {
+                    Result = new TemplateMatchResult { IsMatch = false, Message = "No match." }
+                },
+                new RecordingInputService());
+
+            var result = await behavior.ExecuteAsync(
+                CreateContext(),
+                new ClickTemplateBehaviorParameters
+                {
+                    TemplatePath = templatePath,
+                    FailWhenNotFound = false
+                },
+                TestContext.Current.CancellationToken);
+
+            Assert.True(result.IsSuccess);
+            Assert.Equal("not-found", result.StatusCode);
+        }
+        finally
+        {
+            File.Delete(templatePath);
+        }
+    }
+
     private static BehaviorExecutionContext CreateContext()
     {
         return new BehaviorExecutionContext
